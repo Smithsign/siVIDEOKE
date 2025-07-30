@@ -1,38 +1,74 @@
-const songListElement = document.getElementById('song-list');
-const player = document.getElementById('player');
-const lyricsDiv = document.getElementById('lyrics');
-const searchInput = document.getElementById('search');
+const songListElement = document.getElementById('songList');
+const audio = document.getElementById('audio');
+const lyricsDisplay = document.getElementById('lyricsDisplay');
 
-let songs = [];
+const songs = [
+  {
+    title: "Perfect (Karaoke)",
+    audio: "songs/perfect.mp3",
+    lyrics: "songs/perfect.lrc"
+  },
+  {
+    title: "Let It Go (Karaoke)",
+    audio: "songs/letitgo.mp3",
+    lyrics: "songs/letitgo.lrc"
+  }
+];
 
-fetch('songs.json')
-  .then(response => response.json())
-  .then(data => {
-    songs = data;
-    displaySongs(data);
-  });
+let currentLyrics = [];
 
-function displaySongs(songArray) {
-  songListElement.innerHTML = '';
-  songArray.forEach(song => {
-    const card = document.createElement('div');
-    card.className = 'song-card';
-    card.innerHTML = `<strong>${song.title}</strong><br/><em>${song.artist}</em>`;
-    card.onclick = () => playSong(song);
-    songListElement.appendChild(card);
-  });
+function loadSong(song) {
+  audio.src = song.audio;
+  fetch(song.lyrics)
+    .then(res => res.text())
+    .then(parseLRC);
 }
 
-function playSong(song) {
-  player.src = `https://www.youtube.com/embed/${song.youtubeId}?autoplay=1`;
-  lyricsDiv.textContent = song.lyrics;
+function parseLRC(text) {
+  currentLyrics = [];
+  const lines = text.split("\n");
+  for (let line of lines) {
+    const match = line.match(/\[(\d+):(\d+\.\d+)\](.*)/);
+    if (match) {
+      const minutes = parseInt(match[1]);
+      const seconds = parseFloat(match[2]);
+      const time = minutes * 60 + seconds;
+      const text = match[3];
+      currentLyrics.push({ time, text });
+    }
+  }
+  displayLyrics();
 }
 
-searchInput.addEventListener('input', () => {
-  const keyword = searchInput.value.toLowerCase();
-  const filtered = songs.filter(song =>
-    song.title.toLowerCase().includes(keyword) ||
-    song.artist.toLowerCase().includes(keyword)
-  );
-  displaySongs(filtered);
+function displayLyrics() {
+  lyricsDisplay.innerHTML = currentLyrics
+    .map((line, index) => `<div id="line-${index}">${line.text}</div>`)
+    .join("");
+}
+
+audio.addEventListener("timeupdate", () => {
+  const currentTime = audio.currentTime;
+  for (let i = 0; i < currentLyrics.length; i++) {
+    if (currentTime >= currentLyrics[i].time &&
+        (i + 1 >= currentLyrics.length || currentTime < currentLyrics[i + 1].time)) {
+      highlightLine(i);
+      break;
+    }
+  }
+});
+
+function highlightLine(index) {
+  currentLyrics.forEach((_, i) => {
+    const lineEl = document.getElementById(`line-${i}`);
+    lineEl.classList.remove("highlight");
+  });
+  const activeLine = document.getElementById(`line-${index}`);
+  if (activeLine) activeLine.classList.add("highlight");
+}
+
+songs.forEach(song => {
+  const li = document.createElement('li');
+  li.textContent = song.title;
+  li.onclick = () => loadSong(song);
+  songListElement.appendChild(li);
 });
