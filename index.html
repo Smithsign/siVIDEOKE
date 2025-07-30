@@ -3,47 +3,52 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Smithsign Videoke</title>
+  <title>Orange Dynasty Karaoke</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="container">
-    <h1 class="title">🎤 SMITHSIGN VIDEOKE</h1>
+  <video autoplay loop muted id="bg-video">
+    <source src="background.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+  </video>
 
-    <div class="screen">
-      <div id="codeDisplay">ENTER SONG CODE</div>
-      <div id="countdown"></div>
-      <ul id="lyrics"></ul>
+  <div class="karaoke-machine">
+    <div class="header">
+      <h1>🎤 Orange Dynasty Karaoke 🎤</h1>
+      <p>🐉 Sing with the power of the Dragon! 🍊</p>
+    </div>
+
+    <div class="song-code-input">
+      <label for="songCode">Enter Song Code:</label>
+      <input type="text" id="songCode" placeholder="e.g. 18252" maxlength="5" />
+      <button id="lookupBtn">Lookup</button>
+    </div>
+
+    <div id="songDetails" class="hidden">
+      <h2 id="songTitle"></h2>
+      <p id="songArtist"></p>
+      <button id="playBtn">Play ▶</button>
+      <button id="stopBtn">Stop ⏹</button>
+    </div>
+
+    <div class="karaoke-screen">
+      <div id="lyricsContainer"></div>
     </div>
 
     <div class="controls">
-      <div class="number-pad">
-        <button onclick="press('1')">1</button>
-        <button onclick="press('2')">2</button>
-        <button onclick="press('3')">3</button>
-        <button onclick="press('4')">4</button>
-        <button onclick="press('5')">5</button>
-        <button onclick="press('6')">6</button>
-        <button onclick="press('7')">7</button>
-        <button onclick="press('8')">8</button>
-        <button onclick="press('9')">9</button>
-        <button onclick="clearCode()">C</button>
-        <button onclick="press('0')">0</button>
-        <button onclick="playSong()">OK</button>
-      </div>
-      <button class="stop-btn" onclick="stopSong()">STOP</button>
+      <label for="volume">🎛 Volume:</label>
+      <input type="range" id="volume" min="0" max="1" step="0.01" value="0.5" />
     </div>
 
+    <canvas id="micVisualizer"></canvas>
+
     <div class="songbook">
-      <h2>SONGBOOK</h2>
-      <ul>
-        <li>18252 - Pour It Up - Rihanna</li>
-        <!-- Add more songs here -->
-      </ul>
+      <h3>📖 Songbook (Code – Title – Artist)</h3>
+      <ul id="songList"></ul>
     </div>
   </div>
 
-  <audio id="audio" src="pouritup.m4a"></audio>
+  <audio id="audio" crossorigin="anonymous"></audio>
   <script src="script.js"></script>
 </body>
 </html>
