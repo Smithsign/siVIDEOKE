@@ -272,78 +272,90 @@ document.addEventListener('DOMContentLoaded', function() {
         return lyrics.sort((a, b) => a.time - b.time);
     }
     
+      // Function to start playback and display lyrics
+    function startPlayback() {
+        if (!currentSong) return;
+        
+        // Load audio
+        audioPlayer.src = currentSong.audioFile;
+        audioPlayer.play();
+        
+        // Load lyrics
+        fetch(currentSong.lyricsFile)
+            .then(response => response.text())
+            .then(text => {
+                lyricsData = parseLRC(text);
+                displayLyrics();
+                
+                // Update lyrics in sync with audio
+                audioPlayer.addEventListener('timeupdate', syncLyrics);
+            });
+    }
+    
+    // Function to parse LRC format lyrics
+    function parseLRC(lrcText) {
+        const lines = lrcText.split('\n');
+        const lyrics = [];
+        
+        const timeRegex = /\[(\d+):(\d+\.\d+)\]/;
+        
+        lines.forEach(line => {
+            const match = timeRegex.exec(line);
+            if (match) {
+                const minutes = parseFloat(match[1]);
+                const seconds = parseFloat(match[2]);
+                const time = minutes * 60 + seconds;
+                const text = line.replace(timeRegex, '').trim();
+                
+                if (text) {
+                    lyrics.push({ time, text });
+                }
+            }
+        });
+        
+        return lyrics;
+    }
+    
     // Function to display lyrics
     function displayLyrics() {
         lyricsDisplay.innerHTML = '';
         
-        lyricsData.forEach((line, index) => {
+        lyricsData.forEach(line => {
             const p = document.createElement('p');
             p.textContent = line.text;
             p.dataset.time = line.time;
-            p.dataset.index = index;
             lyricsDisplay.appendChild(p);
         });
-        
-        centerLyrics();
     }
     
-    // Function to center lyrics
-    function centerLyrics() {
-        const containerHeight = lyricsContainer.clientHeight;
-        const lyricsHeight = lyricsDisplay.clientHeight;
-        lyricsDisplay.style.top = `${(containerHeight - lyricsHeight) / 2}px`;
-    }
-    
-    // Precise lyrics synchronization
+    // Function to sync lyrics with audio
     function syncLyrics() {
-        const currentTime = parseFloat(audioPlayer.currentTime.toFixed(3));
-        let newActiveIndex = -1;
+        const currentTime = audioPlayer.currentTime;
+        let activeLine = null;
         
-        // Find the current active lyric
+        // Find the current line to highlight
         for (let i = 0; i < lyricsData.length; i++) {
-            if (currentTime >= lyricsData[i].time) {
-                newActiveIndex = i;
+            if (lyricsData[i].time <= currentTime) {
+                activeLine = i;
             } else {
                 break;
             }
         }
         
-        // Update if lyric changed
-        if (newActiveIndex !== activeLyricIndex) {
-            activeLyricIndex = newActiveIndex;
-            updateLyricsDisplay(currentTime);
-            
-            if (activeLyricIndex >= 0) {
-                scrollToActiveLine();
-            }
-        }
-        
-        // Update character highlighting
-        if (activeLyricIndex >= 0) {
-            highlightCurrentCharacters(currentTime);
-        }
-    }
-    
-    // Function to update lyrics display states
-    function updateLyricsDisplay(currentTime) {
+        // Update display
         const lines = lyricsDisplay.querySelectorAll('p');
-        
         lines.forEach((line, index) => {
-            line.classList.remove('active', 'passed', 'upcoming');
-            line.innerHTML = line.textContent;
-            
-            if (index < activeLyricIndex) {
-                line.classList.add('passed');
-            } else if (index === activeLyricIndex) {
-                line.classList.add('active');
-                lyricStartTime = lyricsData[index].time;
-                lyricEndTime = (index < lyricsData.length - 1) ? 
-                    lyricsData[index + 1].time : lyricStartTime + 5;
+            if (index === activeLine) {
+                line.style.color = 'yellow';
+                line.style.fontSize = '1.5rem';
+                line.scrollIntoView({ behavior: 'smooth', block: 'center' });
             } else {
-                line.classList.add('upcoming');
+                line.style.color = 'white';
+                line.style.fontSize = '1.2rem';
             }
         });
     }
+});
     
     // Function to highlight characters in current line
     function highlightCurrentCharacters(currentTime) {
