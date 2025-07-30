@@ -3,50 +3,67 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Orange Dynasty Karaoke 🎤🍊🐉</title>
+  <title>Orange Dynasty Karaoke</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-
-  <video id="bg-video" autoplay loop muted>
-    <source src="bg-video.mp4" type="video/mp4" />
-  </video>
-
-  <div class="karaoke-container">
+  <div id="karaoke">
     <header>
-      <h1>🎤 Orange Dynasty Karaoke 🍊🐉</h1>
+      <h1>🐉 Orange Dynasty Karaoke 🍊</h1>
     </header>
 
-    <div class="screen">
-      <div id="countdown"></div>
-      <div id="lyrics-display"></div>
+    <!-- Background video like real videoke -->
+    <video id="bg-video" autoplay muted loop>
+      <source src="background.mp4" type="video/mp4" />
+      Your browser does not support the video tag.
+    </video>
+
+    <!-- Karaoke screen -->
+    <div id="screen">
+      <div id="lyrics"></div>
     </div>
 
-    <div class="controls">
-      <div class="volume">
-        <label>🎛 Volume</label>
-        <input type="range" id="volumeControl" min="0" max="1" step="0.01" value="1" />
+    <!-- CD Album -->
+    <div id="cd-cover">
+      <img src="cdcover.jpg" alt="CD Cover" />
+    </div>
+
+    <!-- Microphone Visualizer -->
+    <canvas id="mic-visualizer"></canvas>
+
+    <!-- Volume control -->
+    <label for="volumeControl">🎛 Volume</label>
+    <input type="range" id="volumeControl" min="0" max="1" step="0.01" value="0.8">
+
+    <!-- Countdown -->
+    <div id="countdown"></div>
+
+    <!-- Input Song Code -->
+    <div id="code-input">
+      <div id="code-display"></div>
+      <div class="buttons">
+        "1234567890".split("").forEach(n => {
+          document.write(`<button class="num-btn" data-num="${n}">${n}</button>`);
+        });
+        document.write(`<button id="clear">CLEAR</button>`);
+        document.write(`<button id="play">PLAY</button>`);
+        document.write(`<button id="stop">STOP</button>`);
       </div>
-      <div id="micVisualizer"></div>
     </div>
 
-    <div class="keypad">
-      <input type="text" id="codeInput" placeholder="Enter song code" readonly />
-      <div class="keys">
-        ${[1,2,3,4,5,6,7,8,9,0].map(n => `<button class="num">${n}</button>`).join("")}
-        <button id="clear">C</button>
-        <button id="play">PLAY</button>
-        <button id="stop">STOP</button>
-      </div>
+    <!-- Songbook -->
+    <div id="songbook">
+      <h2>📖 Song Book</h2>
+      <ul>
+        <li>18252 - Pour It Up by Rihanna</li>
+        <li>13433 - Shape of You by Ed Sheeran</li>
+      </ul>
     </div>
 
-    <div class="songbook">
-      <h2>📖 SONG BOOK</h2>
-      <ul id="songList"></ul>
-    </div>
+    <!-- Audio Player -->
+    <audio id="karaoke-audio"></audio>
   </div>
 
-  <audio id="audio" src=""></audio>
   <script src="script.js"></script>
 </body>
 </html>
