@@ -1,70 +1,57 @@
-const songListElement = document.getElementById('songList');
-const audio = document.getElementById('audio');
-const lyricsDisplay = document.getElementById('lyricsDisplay');
+let lrcLines = [];
+let currentLine = 0;
 
-const songs = [
-  {
-    title: "Pour It Up (Karaoke)",
-    audio: "pouritup.mp3",
-    lyrics: "pouritup.lrc"
-  }
-];
+const audio = document.getElementById("audio");
+const startButton = document.getElementById("startButton");
+const lyricsEl = document.getElementById("lyrics");
 
+startButton.addEventListener("click", () => {
+  startButton.disabled = true;
+  lyricsEl.textContent = "Starting in 3...";
+  
+  setTimeout(() => {
+    lyricsEl.textContent = "Starting in 2...";
+    setTimeout(() => {
+      lyricsEl.textContent = "Starting in 1...";
+      setTimeout(() => {
+        audio.play();
+        showLyrics();
+      }, 1000);
+    }, 1000);
+  }, 1000);
+});
 
-let currentLyrics = [];
+// Load LRC file
+fetch("songs/pouritup.lrc")
+  .then((response) => response.text())
+  .then(parseLRC);
 
-function loadSong(song) {
-  audio.src = song.audio;
-  fetch(song.lyrics)
-    .then(res => res.text())
-    .then(parseLRC);
-}
-
-function parseLRC(text) {
-  currentLyrics = [];
-  const lines = text.split("\n");
-  for (let line of lines) {
-    const match = line.match(/\[(\d+):(\d+\.\d+)\](.*)/);
+function parseLRC(data) {
+  const lines = data.split("\n");
+  lines.forEach((line) => {
+    const match = line.match(/\[(\d+):(\d+\.\d+)\](.+)/);
     if (match) {
       const minutes = parseInt(match[1]);
       const seconds = parseFloat(match[2]);
+      const text = match[3].trim();
       const time = minutes * 60 + seconds;
-      const text = match[3];
-      currentLyrics.push({ time, text });
+      lrcLines.push({ time, text });
     }
-  }
-  displayLyrics();
-}
-
-function displayLyrics() {
-  lyricsDisplay.innerHTML = currentLyrics
-    .map((line, index) => `<div id="line-${index}">${line.text}</div>`)
-    .join("");
-}
-
-audio.addEventListener("timeupdate", () => {
-  const currentTime = audio.currentTime;
-  for (let i = 0; i < currentLyrics.length; i++) {
-    if (currentTime >= currentLyrics[i].time &&
-        (i + 1 >= currentLyrics.length || currentTime < currentLyrics[i + 1].time)) {
-      highlightLine(i);
-      break;
-    }
-  }
-});
-
-function highlightLine(index) {
-  currentLyrics.forEach((_, i) => {
-    const lineEl = document.getElementById(`line-${i}`);
-    lineEl.classList.remove("highlight");
   });
-  const activeLine = document.getElementById(`line-${index}`);
-  if (activeLine) activeLine.classList.add("highlight");
 }
 
-songs.forEach(song => {
-  const li = document.createElement('li');
-  li.textContent = song.title;
-  li.onclick = () => loadSong(song);
-  songListElement.appendChild(li);
-});
+function showLyrics() {
+  const interval = setInterval(() => {
+    if (currentLine >= lrcLines.length) {
+      clearInterval(interval);
+      return;
+    }
+
+    const currentTime = audio.currentTime;
+    if (currentTime >= lrcLines[currentLine].time) {
+      lyricsEl.textContent = lrcLines[currentLine].text;
+      lyricsEl.classList.add("active");
+      currentLine++;
+    }
+  }, 100);
+}
