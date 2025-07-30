@@ -1,164 +1,188 @@
-const audio = document.getElementById('audio');
-const lyricsContainer = document.getElementById('lyrics');
-const playBtn = document.getElementById('play-btn');
-const volumeSlider = document.getElementById('volume-slider');
-const micCanvas = document.getElementById('mic-visualizer');
-const backgroundVideo = document.getElementById('background-video');
-const songTitle = document.getElementById('song-title');
-
-let currentLyrics = [];
-let currentLineIndex = -1;
-let animationFrame;
-let isPlaying = false;
-
-// 1. Load LRC Lyrics File
-async function loadLRC(songName) {
-    const res = await fetch(`${songName}.lrc`);
-    const text = await res.text();
-    return parseLRC(text);
-}
-
-// 2. Parse .lrc
-function parseLRC(lrc) {
-    const lines = lrc.split('\n');
-    const lyrics = [];
-
-    for (let line of lines) {
-        const match = line.match(/\[(\d+):(\d+\.\d+)\](.*)/);
-        if (match) {
-            const min = parseInt(match[1]);
-            const sec = parseFloat(match[2]);
-            const time = min * 60 + sec;
-            lyrics.push({ time, text: match[3] });
-        }
-    }
-
-    return lyrics;
-}
-
-// 3. Display Lyrics
-function displayLyrics(lyrics) {
-    lyricsContainer.innerHTML = '';
-    lyrics.forEach((line, index) => {
-        const div = document.createElement('div');
-        div.classList.add('lyric-line');
-        div.dataset.index = index;
-        div.innerText = line.text;
-        lyricsContainer.appendChild(div);
-    });
-}
-
-// 4. Sync Lyrics
-function syncLyrics() {
-    const currentTime = audio.currentTime;
-
-    for (let i = 0; i < currentLyrics.length; i++) {
-        if (
-            currentTime >= currentLyrics[i].time &&
-            (i === currentLyrics.length - 1 || currentTime < currentLyrics[i + 1].time)
-        ) {
-            if (i !== currentLineIndex) {
-                const oldLine = document.querySelector('.lyric-line.active');
-                if (oldLine) oldLine.classList.remove('active');
-
-                const newLine = document.querySelector(`.lyric-line[data-index="${i}"]`);
-                if (newLine) {
-                    newLine.classList.add('active');
-                    newLine.scrollIntoView({ behavior: 'smooth', block: 'center' });
+document.addEventListener('DOMContentLoaded', function() {
+    // DOM Elements
+    const numButtons = document.querySelectorAll('.num-btn');
+    const playButton = document.getElementById('play-btn');
+    const stopButton = document.getElementById('stop-btn');
+    const songbookButton = document.getElementById('songbook-btn');
+    const codeDisplay = document.getElementById('code-display');
+    const songInfoDisplay = document.getElementById('song-info');
+    const lyricsDisplay = document.getElementById('lyrics');
+    const countdownDisplay = document.getElementById('countdown');
+    const audioPlayer = document.getElementById('audio-player');
+    const songbookModal = document.getElementById('songbook-modal');
+    const closeModal = document.querySelector('.close');
+    const songTableBody = document.querySelector('#song-table tbody');
+    
+    // State variables
+    let currentCode = '';
+    let currentSong = null;
+    let lyricsData = [];
+    let countdownInterval;
+    
+    // Load songs and initialize
+    fetch('songs.json')
+        .then(response => response.json())
+        .then(songs => {
+            // Populate song book table
+            songs.forEach(song => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${song.code}</td>
+                    <td>${song.title}</td>
+                    <td>${song.artist}</td>
+                `;
+                songTableBody.appendChild(row);
+            });
+            
+            // Number button event listeners
+            numButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const number = this.getAttribute('data-number');
+                    currentCode += number;
+                    codeDisplay.textContent = currentCode;
+                    
+                    // Check if code matches any song
+                    const matchedSong = songs.find(song => song.code === currentCode);
+                    if (matchedSong) {
+                        currentSong = matchedSong;
+                        songInfoDisplay.textContent = `${matchedSong.title} - ${matchedSong.artist}`;
+                    }
+                });
+            });
+            
+            // Play button event listener
+            playButton.addEventListener('click', function() {
+                if (!currentSong) return;
+                
+                // Start countdown
+                let count = 3;
+                countdownDisplay.textContent = count;
+                countdownDisplay.style.display = 'block';
+                lyricsDisplay.style.display = 'none';
+                
+                countdownInterval = setInterval(() => {
+                    count--;
+                    countdownDisplay.textContent = count;
+                    
+                    if (count <= 0) {
+                        clearInterval(countdownInterval);
+                        countdownDisplay.style.display = 'none';
+                        lyricsDisplay.style.display = 'block';
+                        startPlayback();
+                    }
+                }, 1000);
+            });
+            
+            // Stop button event listener
+            stopButton.addEventListener('click', function() {
+                clearInterval(countdownInterval);
+                countdownDisplay.style.display = 'none';
+                audioPlayer.pause();
+                audioPlayer.currentTime = 0;
+                currentCode = '';
+                codeDisplay.textContent = '';
+                songInfoDisplay.textContent = '';
+                lyricsDisplay.textContent = '';
+                currentSong = null;
+            });
+            
+            // Song book button event listeners
+            songbookButton.addEventListener('click', function() {
+                songbookModal.style.display = 'block';
+            });
+            
+            closeModal.addEventListener('click', function() {
+                songbookModal.style.display = 'none';
+            });
+            
+            window.addEventListener('click', function(event) {
+                if (event.target === songbookModal) {
+                    songbookModal.style.display = 'none';
                 }
-
-                currentLineIndex = i;
-            }
-            break;
-        }
+            });
+        });
+    
+    // Function to start playback and display lyrics
+    function startPlayback() {
+        if (!currentSong) return;
+        
+        // Load audio
+        audioPlayer.src = currentSong.audioFile;
+        audioPlayer.play();
+        
+        // Load lyrics
+        fetch(currentSong.lyricsFile)
+            .then(response => response.text())
+            .then(text => {
+                lyricsData = parseLRC(text);
+                displayLyrics();
+                
+                // Update lyrics in sync with audio
+                audioPlayer.addEventListener('timeupdate', syncLyrics);
+            });
     }
-
-    animationFrame = requestAnimationFrame(syncLyrics);
-}
-
-// 5. Play Song
-async function playSong(songName) {
-    isPlaying = true;
-    songTitle.innerText = songName.replace(/_/g, ' ').toUpperCase();
-
-    audio.src = `${songName}.m4a`;
-    backgroundVideo.play();
-
-    currentLyrics = await loadLRC(songName);
-    displayLyrics(currentLyrics);
-
-    audio.play();
-    animationFrame = requestAnimationFrame(syncLyrics);
-}
-
-// 6. Volume Control
-volumeSlider.addEventListener('input', () => {
-    audio.volume = volumeSlider.value;
-});
-
-// 7. Mic Visualizer
-navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const source = audioCtx.createMediaStreamSource(stream);
-    const analyser = audioCtx.createAnalyser();
-    analyser.fftSize = 256;
-    source.connect(analyser);
-
-    const canvas = micCanvas;
-    const ctx = canvas.getContext('2d');
-    const bufferLength = analyser.frequencyBinCount;
-    const dataArray = new Uint8Array(bufferLength);
-
-    function draw() {
-        requestAnimationFrame(draw);
-        analyser.getByteFrequencyData(dataArray);
-
-        ctx.fillStyle = '#000';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        const barWidth = (canvas.width / bufferLength) * 2.5;
-        let x = 0;
-
-        for (let i = 0; i < bufferLength; i++) {
-            const barHeight = dataArray[i];
-            const r = 255;
-            const g = 100 + (barHeight / 2);
-            const b = 50;
-
-            ctx.fillStyle = `rgb(${r},${g},${b})`;
-            ctx.fillRect(x, canvas.height - barHeight / 2, barWidth, barHeight / 2);
-
-            x += barWidth + 1;
-        }
-    }
-
-    draw();
-});
-
-// 8. Bind Number Buttons to Song Codes
-const songMap = {
-    '1': 'pouritup'
-};
-
-document.querySelectorAll('.number-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-        const code = btn.innerText;
-        if (songMap[code]) {
-            if (isPlaying) {
-                audio.pause();
-                cancelAnimationFrame(animationFrame);
+    
+    // Function to parse LRC format lyrics
+    function parseLRC(lrcText) {
+        const lines = lrcText.split('\n');
+        const lyrics = [];
+        
+        const timeRegex = /\[(\d+):(\d+\.\d+)\]/;
+        
+        lines.forEach(line => {
+            const match = timeRegex.exec(line);
+            if (match) {
+                const minutes = parseFloat(match[1]);
+                const seconds = parseFloat(match[2]);
+                const time = minutes * 60 + seconds;
+                const text = line.replace(timeRegex, '').trim();
+                
+                if (text) {
+                    lyrics.push({ time, text });
+                }
             }
-            playSong(songMap[code]);
+        });
+        
+        return lyrics;
+    }
+    
+    // Function to display lyrics
+    function displayLyrics() {
+        lyricsDisplay.innerHTML = '';
+        
+        lyricsData.forEach(line => {
+            const p = document.createElement('p');
+            p.textContent = line.text;
+            p.dataset.time = line.time;
+            lyricsDisplay.appendChild(p);
+        });
+    }
+    
+    // Function to sync lyrics with audio
+    function syncLyrics() {
+        const currentTime = audioPlayer.currentTime;
+        let activeLine = null;
+        
+        // Find the current line to highlight
+        for (let i = 0; i < lyricsData.length; i++) {
+            if (lyricsData[i].time <= currentTime) {
+                activeLine = i;
+            } else {
+                break;
+            }
         }
-    });
-});
-
-// 9. Play Button
-playBtn.addEventListener('click', () => {
-    const selectedCode = prompt('Enter Song Code (e.g., 1):');
-    if (songMap[selectedCode]) {
-        playSong(songMap[selectedCode]);
-    } else {
-        alert('Song not found!');
+        
+        // Update display
+        const lines = lyricsDisplay.querySelectorAll('p');
+        lines.forEach((line, index) => {
+            if (index === activeLine) {
+                line.style.color = 'yellow';
+                line.style.fontSize = '1.5rem';
+                line.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            } else {
+                line.style.color = 'white';
+                line.style.fontSize = '1.2rem';
+            }
+        });
     }
 });
