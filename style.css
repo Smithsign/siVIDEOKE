@@ -1,136 +1,110 @@
 body {
   margin: 0;
-  font-family: 'Arial Black', sans-serif;
-  background: rgba(0,0,0,0.8);
+  font-family: 'Arial', sans-serif;
+  background: #111;
   color: orange;
   overflow: hidden;
 }
 
+#karaoke {
+  text-align: center;
+  position: relative;
+}
+
+header {
+  font-size: 2rem;
+  background: #ff6600;
+  padding: 1rem;
+  color: white;
+}
+
 #bg-video {
   position: fixed;
-  top: 0;
-  left: 0;
+  top: 0; left: 0;
   width: 100vw;
   height: 100vh;
   object-fit: cover;
-  z-index: -1;
-  opacity: 0.5;
+  z-index: -2;
+  opacity: 0.3;
 }
 
-.karaoke-container {
-  text-align: center;
-  padding: 1rem;
-}
-
-header h1 {
-  font-size: 2.5rem;
-  margin-bottom: 1rem;
-  text-shadow: 2px 2px 8px #000;
-}
-
-.screen {
-  background: rgba(0, 0, 0, 0.7);
-  border: 3px solid orange;
-  border-radius: 20px;
+#screen {
+  margin-top: 2rem;
+  background: rgba(0,0,0,0.7);
   padding: 2rem;
-  margin: 1rem auto;
-  width: 90%;
-  max-width: 1000px;
+  border-radius: 12px;
+  width: 80%;
+  margin: auto;
   height: 200px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
 }
 
-#lyrics-display {
+#lyrics {
   font-size: 2rem;
-  line-height: 1.5;
-  color: #fff;
+  line-height: 2.5rem;
 }
 
 .active {
-  color: orange;
+  color: yellow;
   font-weight: bold;
-  text-shadow: 0 0 10px orange;
+}
+
+#cd-cover img {
+  width: 100px;
+  border-radius: 50%;
+  margin: 1rem auto;
+  animation: spin 8s linear infinite;
+}
+
+@keyframes spin {
+  100% { transform: rotate(360deg); }
+}
+
+#code-display {
+  font-size: 2rem;
+  margin: 1rem 0;
+}
+
+.buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.num-btn, #clear, #play, #stop {
+  padding: 1rem;
+  font-size: 1.2rem;
+  background: orange;
+  color: black;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+#songbook {
+  background: #222;
+  padding: 1rem;
+  width: 300px;
+  margin: auto;
+  border: 2px solid orange;
+  border-radius: 8px;
+}
+
+#volumeControl {
+  width: 200px;
+  margin-top: 1rem;
 }
 
 #countdown {
   font-size: 3rem;
-  margin-bottom: 1rem;
-}
-
-.controls {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 2rem;
-}
-
-.volume input {
-  width: 150px;
-}
-
-#micVisualizer {
-  width: 150px;
-  height: 30px;
-  background: rgba(255,255,255,0.1);
-  border-radius: 5px;
-}
-
-.keypad {
-  margin-top: 2rem;
-}
-
-#codeInput {
-  font-size: 2rem;
-  padding: 0.5rem;
-  width: 300px;
-  text-align: center;
-}
-
-.keys {
-  display: grid;
-  grid-template-columns: repeat(3, 80px);
-  justify-content: center;
-  gap: 10px;
+  color: red;
   margin-top: 1rem;
 }
 
-.keys button {
-  font-size: 1.5rem;
-  padding: 1rem;
-  background: orange;
-  border: none;
-  border-radius: 10px;
-  color: white;
-  cursor: pointer;
-}
-
-.keys button:hover {
-  background: darkorange;
-}
-
-.songbook {
-  margin-top: 2rem;
-  background: rgba(0,0,0,0.5);
-  padding: 1rem;
-  border-radius: 10px;
-  width: 80%;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.songbook h2 {
-  font-size: 2rem;
-  margin-bottom: 0.5rem;
-}
-
-.songbook ul {
-  list-style: none;
-  padding: 0;
-  font-size: 1.2rem;
-  color: white;
-  max-height: 200px;
-  overflow-y: auto;
+#mic-visualizer {
+  width: 300px;
+  height: 100px;
+  background: black;
+  margin: 1rem auto;
 }
