@@ -1,74 +1,41 @@
 body {
-  background: #000;
+  background: black;
   color: white;
-  font-family: 'Courier New', monospace;
-  margin: 0;
-  padding: 0;
-}
-
-.videoke-machine {
-  max-width: 1000px;
-  margin: auto;
-  background: #1a1a1a;
-  border: 5px solid #ffcc00;
-  border-radius: 15px;
-  box-shadow: 0 0 20px #ffcc00;
-}
-
-header, footer {
-  background: #ffcc00;
-  color: #000;
-  padding: 1rem;
-  text-align: center;
-  font-weight: bold;
-  font-size: 1.5rem;
-}
-
-.main {
+  font-family: 'Arial', sans-serif;
   display: flex;
-  padding: 1rem;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
 }
 
-.songbook {
-  width: 30%;
-  border-right: 2px solid #fff;
+.karaoke-container {
+  text-align: center;
 }
 
-.songbook ul {
-  list-style: none;
-  padding: 0;
+.title {
+  color: orange;
+  font-size: 2em;
+  margin-bottom: 1rem;
 }
 
-.songbook li {
-  padding: 10px;
-  margin: 5px;
-  background: #333;
+button {
+  background: orange;
+  border: none;
+  padding: 1rem 2rem;
+  color: black;
+  font-size: 1.2rem;
   cursor: pointer;
-  border-radius: 5px;
+  border-radius: 8px;
 }
 
-.songbook li:hover {
-  background: #ff6600;
-  color: #000;
+.lyrics-line {
+  margin-top: 2rem;
+  font-size: 2rem;
+  transition: all 0.3s ease;
+  color: white;
 }
 
-.videoke-screen {
-  width: 70%;
-  padding: 0 1rem;
-}
-
-#lyricsDisplay {
-  background: #111;
-  padding: 1rem;
-  border-radius: 10px;
-  margin-top: 1rem;
-  height: 300px;
-  overflow-y: auto;
-  font-size: 1.3rem;
-  line-height: 2rem;
-}
-
-.highlight {
-  color: #00ffcc;
-  font-weight: bold;
+.lyrics-line.active {
+  color: orange;
 }
