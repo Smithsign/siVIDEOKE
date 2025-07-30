@@ -1,27 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Orange Dynasty Videoke</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Virtual Videoke</title>
+  <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
-  <div class="videoke-machine">
-    <header>🎤 Orange Dynasty VIDEOKE SONGBOOK 🎶</header>
-
-    <div class="main">
-      <aside class="songbook">
-        <h2>📖 Song List</h2>
-        <ul id="songList"></ul>
-      </aside>
-
-      <section class="videoke-screen">
-        <audio id="audio" controls></audio>
-        <div id="lyricsDisplay" class="lyrics-display"></div>
-      </section>
-    </div>
-
-    <footer>🎵 Sing your heart out </footer>
+  <div class="karaoke-container">
+    <h1 class="title">🎤 Virtual Videoke</h1>
+    <button id="startButton">Start Singing</button>
+    <div id="lyrics" class="lyrics-line">Get ready...</div>
+    <audio id="audio" src="songs/pouritup.m4a"></audio>
   </div>
 
   <script src="script.js"></script>
