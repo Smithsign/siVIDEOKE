@@ -7,48 +7,54 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <video autoplay loop muted id="bg-video">
-    <source src="background.mp4" type="video/mp4">
-    Your browser does not support the video tag.
+  <video id="bg-video" autoplay loop muted>
+    <source src="bg.mp4" type="video/mp4" />
   </video>
 
-  <div class="karaoke-machine">
-    <div class="header">
+  <div class="karaoke-container">
+    <header>
       <h1>🍊 Orange Dynasty Karaoke 🐉</h1>
-      <p>Sing like a Dragon. Rule like a Dynasty.</p>
-    </div>
+    </header>
 
-    <div class="song-code-input">
-      <label for="songCode">Enter Song Code:</label>
-      <input type="text" id="songCode" placeholder="e.g. 18252" maxlength="5" />
-      <button id="lookupBtn">Lookup</button>
-    </div>
-
-    <div id="songDetails" class="hidden">
-      <h2 id="songTitle"></h2>
-      <p id="songArtist"></p>
-      <button id="playBtn">Play ▶</button>
-      <button id="stopBtn">Stop ⏹</button>
-    </div>
-
-    <div class="karaoke-screen">
-      <div id="lyricsContainer"></div>
+    <div class="screen">
+      <div id="countdown"></div>
+      <div id="song-info"></div>
+      <div id="lyrics"></div>
     </div>
 
     <div class="controls">
-      <label for="volume">🎛 Volume:</label>
-      <input type="range" id="volume" min="0" max="1" step="0.01" value="0.5" />
+      <div class="keypad">
+        <input type="text" id="songCode" placeholder="Enter Song Code" maxlength="5" />
+        <div class="buttons">
+          <button onclick="inputCode('1')">1</button>
+          <button onclick="inputCode('2')">2</button>
+          <button onclick="inputCode('3')">3</button>
+          <button onclick="inputCode('4')">4</button>
+          <button onclick="inputCode('5')">5</button>
+          <button onclick="inputCode('6')">6</button>
+          <button onclick="inputCode('7')">7</button>
+          <button onclick="inputCode('8')">8</button>
+          <button onclick="inputCode('9')">9</button>
+          <button onclick="inputCode('0')">0</button>
+          <button onclick="clearCode()">Clear</button>
+          <button onclick="loadSong()">OK</button>
+        </div>
+      </div>
+      <div class="player-buttons">
+        <button onclick="startKaraoke()">▶️ Play</button>
+        <button onclick="stopKaraoke()">⏹ Stop</button>
+      </div>
+      <div class="volume-control">
+        <label for="volume">🔊 Volume</label>
+        <input type="range" id="volume" min="0" max="1" step="0.01" value="0.8" />
+      </div>
     </div>
 
-    <canvas id="micVisualizer"></canvas>
+    <canvas id="mic-visualizer"></canvas>
 
-    <div class="songbook">
-      <h3>📖 Songbook</h3>
-      <ul id="songList"></ul>
-    </div>
+    <audio id="karaokeAudio"></audio>
   </div>
 
-  <audio id="audio" crossorigin="anonymous"></audio>
   <script src="script.js"></script>
 </body>
 </html>
