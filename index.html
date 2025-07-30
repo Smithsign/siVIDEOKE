@@ -2,18 +2,22 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Virtual Videoke</title>
-  <link rel="stylesheet" href="style.css"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Videoke Arcade</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="karaoke-container">
-    <h1 class="title">🎤 Virtual Videoke</h1>
-    <button id="startButton">Start Singing</button>
-    <div id="lyrics" class="lyrics-line">Get ready...</div>
-    <audio id="audio" src="songs/pouritup.m4a"></audio>
+  <div class="videoke-wrapper">
+    <div id="screen">
+      <img src="mic.png" id="mic" alt="Mic Placeholder" />
+      <audio id="audio" src="" preload="auto"></audio>
+      <div id="lyrics"></div>
+    </div>
+    <div class="songbook">
+      <h2>🎵 Song Book</h2>
+      <ul id="songList"></ul>
+    </div>
   </div>
-
   <script src="script.js"></script>
 </body>
 </html>
