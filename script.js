@@ -1,150 +1,140 @@
-const audio = document.getElementById("karaokeAudio");
-const lyricsContainer = document.getElementById("lyrics");
+const audio = document.getElementById("audio");
+const lyricsDisplay = document.getElementById("lyrics-display");
+const codeInput = document.getElementById("codeInput");
 const countdown = document.getElementById("countdown");
-const songInfo = document.getElementById("song-info");
-const volumeSlider = document.getElementById("volume");
+const volumeControl = document.getElementById("volumeControl");
+const micVisualizer = document.getElementById("micVisualizer");
 
-let lyrics = [];
-let currentLine = 0;
-let interval;
-let isPlaying = false;
+let currentLyrics = [];
 
-// Load volume
-volumeSlider.addEventListener("input", () => {
-  audio.volume = volumeSlider.value;
-});
-
-// Song data
-const songs = {
-  "18252": {
-    title: "Pour It Up",
-    artist: "Rihanna",
-    audio: "pouritup.m4a",
-    lrc: "pouritup.lrc"
+async function loadSongs() {
+  const response = await fetch("songs.json");
+  const songs = await response.json();
+  const songList = document.getElementById("songList");
+  for (const song of songs) {
+    const li = document.createElement("li");
+    li.textContent = `${song.code} - ${song.title} by ${song.artist}`;
+    songList.appendChild(li);
   }
-};
-
-// Enter code with keypad
-function inputCode(num) {
-  const input = document.getElementById("songCode");
-  if (input.value.length < 5) input.value += num;
-}
-function clearCode() {
-  document.getElementById("songCode").value = "";
+  return songs;
 }
 
-function loadSong() {
-  const code = document.getElementById("songCode").value;
-  if (songs[code]) {
-    const { title, artist, audio: audioFile, lrc } = songs[code];
-    songInfo.innerHTML = `<strong>${title}</strong> by ${artist}`;
-    audio.src = audioFile;
-    fetch(lrc)
-      .then(res => res.text())
-      .then(parseLRC);
-  } else {
-    songInfo.innerText = "Invalid code.";
-  }
-}
-
-function parseLRC(data) {
-  lyrics = [];
-  lyricsContainer.innerHTML = "";
-  const lines = data.split("\n");
+function parseLRC(text) {
+  const lines = text.split("\n");
+  const result = [];
   for (let line of lines) {
-    const match = line.match(/\[(\d+):(\d+\.\d+)\](.*)/);
+    const match = line.match(/\[(\d+):(\d+\.?\d*)\](.+)/);
     if (match) {
       const min = parseInt(match[1]);
       const sec = parseFloat(match[2]);
       const time = min * 60 + sec;
-      const text = match[3].trim();
-      lyrics.push({ time, text });
+      const text = match[3];
+      result.push({ time, text });
     }
   }
-  lyrics.forEach(({ text }) => {
-    const span = document.createElement("span");
-    span.textContent = text;
-    lyricsContainer.appendChild(span);
-  });
+  return result;
 }
 
-function startKaraoke() {
-  if (!audio.src) return;
-  countdown.innerText = "3";
-  let count = 3;
-  const cdInterval = setInterval(() => {
-    count--;
-    countdown.innerText = count > 0 ? count : "";
-    if (count === 0) {
-      clearInterval(cdInterval);
-      audio.play();
-      isPlaying = true;
-      syncLyrics();
+function showLyrics(lyrics) {
+  lyricsDisplay.innerHTML = lyrics.map(line => `<div>${line.text}</div>`).join("");
+}
+
+function syncLyrics(lyrics) {
+  let i = 0;
+  const lines = lyricsDisplay.children;
+
+  function update() {
+    if (i >= lyrics.length) return;
+    const currentTime = audio.currentTime;
+    if (currentTime >= lyrics[i].time) {
+      for (const line of lines) line.classList.remove("active");
+      lines[i].classList.add("active");
+      i++;
+    }
+    requestAnimationFrame(update);
+  }
+
+  update();
+}
+
+function startCountdown(cb) {
+  let i = 3;
+  countdown.textContent = i;
+  const interval = setInterval(() => {
+    i--;
+    if (i <= 0) {
+      clearInterval(interval);
+      countdown.textContent = "";
+      cb();
+    } else {
+      countdown.textContent = i;
     }
   }, 1000);
 }
 
-function stopKaraoke() {
-  audio.pause();
-  audio.currentTime = 0;
-  clearInterval(interval);
-  resetLyrics();
-}
+volumeControl.addEventListener("input", () => {
+  audio.volume = volumeControl.value;
+});
 
-function resetLyrics() {
-  const spans = lyricsContainer.querySelectorAll("span");
-  spans.forEach(s => s.classList.remove("active"));
-  currentLine = 0;
-}
+function startMicVisualizer() {
+  navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+    const audioCtx = new AudioContext();
+    const mic = audioCtx.createMediaStreamSource(stream);
+    const analyser = audioCtx.createAnalyser();
+    mic.connect(analyser);
 
-function syncLyrics() {
-  interval = setInterval(() => {
-    if (!isPlaying) return;
-    const currentTime = audio.currentTime;
-    for (let i = 0; i < lyrics.length; i++) {
-      if (
-        currentTime >= lyrics[i].time &&
-        (i === lyrics.length - 1 || currentTime < lyrics[i + 1].time)
-      ) {
-        if (currentLine !== i) {
-          const spans = lyricsContainer.querySelectorAll("span");
-          spans.forEach(s => s.classList.remove("active"));
-          spans[i].classList.add("active");
-          currentLine = i;
-        }
-        break;
-      }
+    const data = new Uint8Array(analyser.frequencyBinCount);
+
+    function draw() {
+      analyser.getByteFrequencyData(data);
+      const volume = data.reduce((a, b) => a + b, 0) / data.length;
+      micVisualizer.style.background = `linear-gradient(to right, orange ${volume / 2}%, transparent 0%)`;
+      requestAnimationFrame(draw);
     }
-  }, 100);
+
+    draw();
+  });
 }
 
-// Mic visualizer
-navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
-  const audioCtx = new AudioContext();
-  const analyser = audioCtx.createAnalyser();
-  const mic = audioCtx.createMediaStreamSource(stream);
-  mic.connect(analyser);
-  analyser.fftSize = 256;
+startMicVisualizer();
 
-  const bufferLength = analyser.frequencyBinCount;
-  const dataArray = new Uint8Array(bufferLength);
-  const canvas = document.getElementById("mic-visualizer");
-  const ctx = canvas.getContext("2d");
+let allSongs = [];
 
-  function draw() {
-    requestAnimationFrame(draw);
-    analyser.getByteFrequencyData(dataArray);
-    ctx.fillStyle = "#000";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    const barWidth = (canvas.width / bufferLength) * 2.5;
-    let x = 0;
-    for (let i = 0; i < bufferLength; i++) {
-      const barHeight = dataArray[i] / 2;
-      ctx.fillStyle = `rgb(${barHeight + 100}, 100, 0)`;
-      ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
-      x += barWidth + 1;
-    }
+loadSongs().then(songs => {
+  allSongs = songs;
+});
+
+document.querySelectorAll(".num").forEach(btn => {
+  btn.addEventListener("click", () => {
+    codeInput.value += btn.textContent;
+  });
+});
+
+document.getElementById("clear").addEventListener("click", () => {
+  codeInput.value = "";
+});
+
+document.getElementById("play").addEventListener("click", async () => {
+  const code = codeInput.value;
+  const song = allSongs.find(s => s.code === code);
+  if (!song) {
+    alert("Invalid song code");
+    return;
   }
 
-  draw();
+  audio.src = song.audio;
+  const lrcText = await fetch(song.lyrics).then(res => res.text());
+  currentLyrics = parseLRC(lrcText);
+  showLyrics(currentLyrics);
+
+  startCountdown(() => {
+    audio.play();
+    syncLyrics(currentLyrics);
+  });
+});
+
+document.getElementById("stop").addEventListener("click", () => {
+  audio.pause();
+  audio.currentTime = 0;
+  lyricsDisplay.innerHTML = "";
 });
