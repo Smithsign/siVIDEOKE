@@ -3,20 +3,19 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Videoke Arcade</title>
+  <title>Videoke App</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="videoke-wrapper">
-    <div id="screen">
-      <img src="mic.png" id="mic" alt="Mic Placeholder" />
-      <audio id="audio" src="" preload="auto"></audio>
-      <div id="lyrics"></div>
-    </div>
-    <div class="songbook">
-      <h2>🎵 Song Book</h2>
-      <ul id="songList"></ul>
-    </div>
+  <div class="karaoke">
+    <img src="mic.png" id="mic-placeholder" alt="Mic Placeholder" />
+    <div id="countdown"></div>
+    <audio id="audio"></audio>
+    <div id="lyrics-container"></div>
+  </div>
+  <div class="songbook">
+    <h2>SONG BOOK</h2>
+    <ul id="song-list"></ul>
   </div>
   <script src="script.js"></script>
 </body>
