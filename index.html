@@ -1,224 +1,57 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pinoy Videoke</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Arial', sans-serif;
-      background: black;
-      color: white;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    #videoke-screen {
-      width: 90%;
-      max-width: 900px;
-      height: 400px;
-      background: linear-gradient(to top, #111, #333);
-      margin-top: 30px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 2em;
-      text-align: center;
-      border: 6px solid orange;
-      border-radius: 20px;
-      position: relative;
-    }
-
-    .highlight {
-      color: orange;
-    }
-
-    #controls {
-      display: grid;
-      grid-template-columns: repeat(3, 80px);
-      gap: 10px;
-      margin-top: 20px;
-    }
-
-    .btn {
-      padding: 20px;
-      font-size: 1.5em;
-      background: orange;
-      color: white;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      box-shadow: 0 4px #999;
-      transition: 0.2s;
-    }
-
-    .btn:active {
-      box-shadow: 0 2px #666;
-      transform: translateY(2px);
-    }
-
-    #song-title {
-      margin-top: 10px;
-      font-size: 1.2em;
-    }
-
-    #song-book {
-      margin-top: 30px;
-      width: 80%;
-      max-width: 600px;
-      background: #222;
-      padding: 20px;
-      border-radius: 10px;
-      text-align: left;
-    }
-
-    .song-book-item {
-      margin-bottom: 10px;
-      font-size: 1em;
-    }
-
-    #cd-cover {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      background: radial-gradient(white, gray);
-      border: 3px solid orange;
-      animation: spin 3s linear infinite;
-      margin-top: 10px;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    #progress {
-      width: 100%;
-      height: 10px;
-      background: #444;
-      margin-top: 10px;
-      border-radius: 5px;
-      overflow: hidden;
-    }
-
-    #progress-bar {
-      height: 100%;
-      width: 0;
-      background: orange;
-    }
-  </style>
+  <title>Videoke Arcade</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div id="videoke-screen">Enter Code Below</div>
-  <div id="song-title"></div>
-  <div id="cd-cover"></div>
-  <div id="progress">
-    <div id="progress-bar"></div>
+  <div class="videoke-container">
+    <div class="screen">
+      <div class="cd"></div>
+      <div id="song-info"></div>
+      <div id="countdown"></div>
+      <div id="lyrics"></div>
+      <div class="progress">
+        <div id="progress-bar"></div>
+      </div>
+    </div>
+
+    <div class="buttons">
+      <div id="number-input"></div>
+      <div class="keypad">
+        <button onclick="press(1)">1</button>
+        <button onclick="press(2)">2</button>
+        <button onclick="press(3)">3</button>
+        <button onclick="press(4)">4</button>
+        <button onclick="press(5)">5</button>
+        <button onclick="press(6)">6</button>
+        <button onclick="press(7)">7</button>
+        <button onclick="press(8)">8</button>
+        <button onclick="press(9)">9</button>
+        <button onclick="clearInput()">C</button>
+        <button onclick="press(0)">0</button>
+        <button onclick="submitCode()">ENTER</button>
+      </div>
+      <div class="controls">
+        <button onclick="playSong()">PLAY</button>
+        <button onclick="stopSong()">STOP</button>
+      </div>
+    </div>
+
+    <div class="songbook">
+      <h3>🎤 SONG BOOK 📖</h3>
+      <ul>
+        <li>18252 - POUR IT UP by RIHANNA</li>
+        <!-- Add more songs here -->
+      </ul>
+    </div>
+
+    <audio id="audio"></audio>
   </div>
 
-  <div id="controls">
-    <button class="btn" onclick="pressNumber(1)">1</button>
-    <button class="btn" onclick="pressNumber(2)">2</button>
-    <button class="btn" onclick="pressNumber(3)">3</button>
-    <button class="btn" onclick="pressNumber(4)">4</button>
-    <button class="btn" onclick="pressNumber(5)">5</button>
-    <button class="btn" onclick="pressNumber(6)">6</button>
-    <button class="btn" onclick="pressNumber(7)">7</button>
-    <button class="btn" onclick="pressNumber(8)">8</button>
-    <button class="btn" onclick="pressNumber(9)">9</button>
-    <button class="btn" onclick="pressNumber(0)">0</button>
-    <button class="btn" onclick="playSong()">▶</button>
-    <button class="btn" onclick="stopSong()">⏹</button>
-  </div>
-
-  <div id="song-book">
-    <h3>SONG BOOK</h3>
-    <div class="song-book-item">18252 — POUR IT UP by Rihanna</div>
-    <!-- Add more songs here -->
-  </div>
-
-  <audio id="audio" src="18252.m4a"></audio>
-
-  <script>
-    const songMap = {
-      "18252": {
-        title: "POUR IT UP",
-        artist: "Rihanna",
-        file: "18252.m4a",
-        lyrics: [
-          { time: 0.5, text: "Throw it, throw it up" },
-          { time: 2.5, text: "Watch it all fall out" },
-          { time: 5.0, text: "Pour it up, pour it up" },
-          { time: 7.0, text: "That's how we ball out" },
-          { time: 9.5, text: "Throw it up, throw it up" },
-          { time: 12.0, text: "Watch it all fall out" },
-          { time: 14.0, text: "Pour it up, pour it up" },
-          { time: 16.5, text: "That's how we ball out" }
-        ]
-      }
-    };
-
-    let inputCode = "";
-    let currentLyrics = [];
-    let lyricsInterval;
-    let audio = document.getElementById("audio");
-    const screen = document.getElementById("videoke-screen");
-    const title = document.getElementById("song-title");
-    const progressBar = document.getElementById("progress-bar");
-
-    function pressNumber(num) {
-      inputCode += num;
-      screen.textContent = inputCode;
-      if (songMap[inputCode]) {
-        const song = songMap[inputCode];
-        title.textContent = `${song.title} by ${song.artist}`;
-      }
-    }
-
-    function playSong() {
-      if (!songMap[inputCode]) return;
-      const song = songMap[inputCode];
-      audio.src = song.file;
-      screen.textContent = "Starting in 3...";
-      let countdown = 3;
-      const cd = setInterval(() => {
-        countdown--;
-        if (countdown === 0) {
-          clearInterval(cd);
-          audio.play();
-          screen.textContent = "";
-          syncLyrics(song.lyrics);
-        } else {
-          screen.textContent = `Starting in ${countdown}...`;
-        }
-      }, 1000);
-    }
-
-    function stopSong() {
-      audio.pause();
-      audio.currentTime = 0;
-      clearInterval(lyricsInterval);
-      screen.textContent = "Enter Code Below";
-      title.textContent = "";
-      inputCode = "";
-      progressBar.style.width = '0%';
-    }
-
-    function syncLyrics(lyrics) {
-      currentLyrics = lyrics;
-      let index = 0;
-      lyricsInterval = setInterval(() => {
-        const time = audio.currentTime;
-        if (index < lyrics.length && time >= lyrics[index].time) {
-          screen.innerHTML = `<span class='highlight'>${lyrics[index].text}</span>`;
-          index++;
-        }
-        const progress = (audio.currentTime / audio.duration) * 100;
-        progressBar.style.width = `${progress}%`;
-      }, 200);
-    }
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
