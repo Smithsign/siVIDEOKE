@@ -3,32 +3,90 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PH Videoke</title>
+  <title>Pinoy Videoke</title>
   <style>
     body {
-      background: linear-gradient(#1c1c1c, #000);
-      color: white;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       margin: 0;
-      overflow: hidden;
-    }
-
-    #player {
-      position: relative;
-      height: 70vh;
+      font-family: 'Arial', sans-serif;
+      background: black;
+      color: white;
       display: flex;
-      align-items: center;
-      justify-content: center;
       flex-direction: column;
+      align-items: center;
     }
 
-    #cd {
-      width: 120px;
-      height: 120px;
+    #videoke-screen {
+      width: 90%;
+      max-width: 900px;
+      height: 400px;
+      background: linear-gradient(to top, #111, #333);
+      margin-top: 30px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 2em;
+      text-align: center;
+      border: 6px solid orange;
+      border-radius: 20px;
+      position: relative;
+    }
+
+    .highlight {
+      color: orange;
+    }
+
+    #controls {
+      display: grid;
+      grid-template-columns: repeat(3, 80px);
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .btn {
+      padding: 20px;
+      font-size: 1.5em;
+      background: orange;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      box-shadow: 0 4px #999;
+      transition: 0.2s;
+    }
+
+    .btn:active {
+      box-shadow: 0 2px #666;
+      transform: translateY(2px);
+    }
+
+    #song-title {
+      margin-top: 10px;
+      font-size: 1.2em;
+    }
+
+    #song-book {
+      margin-top: 30px;
+      width: 80%;
+      max-width: 600px;
+      background: #222;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: left;
+    }
+
+    .song-book-item {
+      margin-bottom: 10px;
+      font-size: 1em;
+    }
+
+    #cd-cover {
+      width: 80px;
+      height: 80px;
       border-radius: 50%;
-      background: url('mic.png') no-repeat center/cover;
-      animation: spin 4s linear infinite;
-      margin-bottom: 20px;
+      background: radial-gradient(white, gray);
+      border: 3px solid orange;
+      animation: spin 3s linear infinite;
+      margin-top: 10px;
     }
 
     @keyframes spin {
@@ -36,166 +94,131 @@
       100% { transform: rotate(360deg); }
     }
 
-    #lyrics {
-      font-size: 24px;
-      text-align: center;
-      padding: 10px;
-      height: 100px;
-      overflow: hidden;
-    }
-
-    .word {
-      opacity: 0.2;
-      transition: opacity 0.3s ease-in-out;
-    }
-
-    .highlight {
-      color: orange;
-      opacity: 1 !important;
-    }
-
-    #progressBar {
-      width: 80%;
+    #progress {
+      width: 100%;
       height: 10px;
       background: #444;
-      border-radius: 10px;
-      margin: 10px auto;
+      margin-top: 10px;
+      border-radius: 5px;
       overflow: hidden;
     }
 
-    #progress {
+    #progress-bar {
       height: 100%;
-      width: 0%;
+      width: 0;
       background: orange;
-      transition: width 0.5s linear;
-    }
-
-    #songBookContainer {
-      position: absolute;
-      bottom: 0;
-      width: 100%;
-      background: #111;
-      padding: 10px;
-    }
-
-    details {
-      background: #222;
-      padding: 10px;
-      border-radius: 5px;
-    }
-
-    summary {
-      font-size: 20px;
-      cursor: pointer;
-      color: orange;
-    }
-
-    ul {
-      list-style: none;
-      padding: 0;
-    }
-
-    li {
-      padding: 5px;
-      cursor: pointer;
-    }
-
-    li:hover {
-      background: #333;
     }
   </style>
 </head>
 <body>
-  <div id="player">
-    <div id="cd"></div>
-    <div id="lyrics">🎤 Let's sing!</div>
-    <div id="progressBar"><div id="progress"></div></div>
-    <audio id="audio"></audio>
+  <div id="videoke-screen">Enter Code Below</div>
+  <div id="song-title"></div>
+  <div id="cd-cover"></div>
+  <div id="progress">
+    <div id="progress-bar"></div>
   </div>
 
-  <div id="songBookContainer">
-    <details open>
-      <summary>🎵 Song Book</summary>
-      <ul id="songList"></ul>
-    </details>
+  <div id="controls">
+    <button class="btn" onclick="pressNumber(1)">1</button>
+    <button class="btn" onclick="pressNumber(2)">2</button>
+    <button class="btn" onclick="pressNumber(3)">3</button>
+    <button class="btn" onclick="pressNumber(4)">4</button>
+    <button class="btn" onclick="pressNumber(5)">5</button>
+    <button class="btn" onclick="pressNumber(6)">6</button>
+    <button class="btn" onclick="pressNumber(7)">7</button>
+    <button class="btn" onclick="pressNumber(8)">8</button>
+    <button class="btn" onclick="pressNumber(9)">9</button>
+    <button class="btn" onclick="pressNumber(0)">0</button>
+    <button class="btn" onclick="playSong()">▶</button>
+    <button class="btn" onclick="stopSong()">⏹</button>
   </div>
+
+  <div id="song-book">
+    <h3>SONG BOOK</h3>
+    <div class="song-book-item">18252 — POUR IT UP by Rihanna</div>
+    <!-- Add more songs here -->
+  </div>
+
+  <audio id="audio" src="18252.m4a"></audio>
 
   <script>
-    const audio = document.getElementById('audio');
-    const lyricsDiv = document.getElementById('lyrics');
-    const progress = document.getElementById('progress');
-    const songList = document.getElementById('songList');
+    const songMap = {
+      "18252": {
+        title: "POUR IT UP",
+        artist: "Rihanna",
+        file: "18252.m4a",
+        lyrics: [
+          { time: 0.5, text: "Throw it, throw it up" },
+          { time: 2.5, text: "Watch it all fall out" },
+          { time: 5.0, text: "Pour it up, pour it up" },
+          { time: 7.0, text: "That's how we ball out" },
+          { time: 9.5, text: "Throw it up, throw it up" },
+          { time: 12.0, text: "Watch it all fall out" },
+          { time: 14.0, text: "Pour it up, pour it up" },
+          { time: 16.5, text: "That's how we ball out" }
+        ]
+      }
+    };
 
+    let inputCode = "";
     let currentLyrics = [];
-    let currentLine = 0;
+    let lyricsInterval;
+    let audio = document.getElementById("audio");
+    const screen = document.getElementById("videoke-screen");
+    const title = document.getElementById("song-title");
+    const progressBar = document.getElementById("progress-bar");
 
-    const songs = [
-      {
-        title: "Pour It Up - Rihanna",
-        audio: "pouritup.m4a",
-        lrc: `pouritup.lrc`
+    function pressNumber(num) {
+      inputCode += num;
+      screen.textContent = inputCode;
+      if (songMap[inputCode]) {
+        const song = songMap[inputCode];
+        title.textContent = `${song.title} by ${song.artist}`;
       }
-    ];
+    }
 
-    songs.forEach((song, index) => {
-      const li = document.createElement('li');
-      li.textContent = song.title;
-      li.onclick = () => loadSong(index);
-      songList.appendChild(li);
-    });
+    function playSong() {
+      if (!songMap[inputCode]) return;
+      const song = songMap[inputCode];
+      audio.src = song.file;
+      screen.textContent = "Starting in 3...";
+      let countdown = 3;
+      const cd = setInterval(() => {
+        countdown--;
+        if (countdown === 0) {
+          clearInterval(cd);
+          audio.play();
+          screen.textContent = "";
+          syncLyrics(song.lyrics);
+        } else {
+          screen.textContent = `Starting in ${countdown}...`;
+        }
+      }, 1000);
+    }
 
-    async function loadSong(index) {
-      const song = songs[index];
-      audio.src = song.audio;
-      const lrcText = await fetch(song.lrc).then(res => res.text());
-      currentLyrics = parseLRC(lrcText);
-      currentLine = 0;
-      lyricsDiv.innerHTML = '';
+    function stopSong() {
+      audio.pause();
       audio.currentTime = 0;
-
-      setTimeout(() => {
-        audio.play();
-      }, 3000);
+      clearInterval(lyricsInterval);
+      screen.textContent = "Enter Code Below";
+      title.textContent = "";
+      inputCode = "";
+      progressBar.style.width = '0%';
     }
 
-    function parseLRC(lrc) {
-      const lines = lrc.split('\n');
-      const result = [];
-      for (let line of lines) {
-        const match = line.match(/\[(\d+):(\d+\.\d+)\](.*)/);
-        if (match) {
-          const time = parseFloat(match[1]) * 60 + parseFloat(match[2]);
-          const text = match[3];
-          result.push({ time, text });
+    function syncLyrics(lyrics) {
+      currentLyrics = lyrics;
+      let index = 0;
+      lyricsInterval = setInterval(() => {
+        const time = audio.currentTime;
+        if (index < lyrics.length && time >= lyrics[index].time) {
+          screen.innerHTML = `<span class='highlight'>${lyrics[index].text}</span>`;
+          index++;
         }
-      }
-      return result;
+        const progress = (audio.currentTime / audio.duration) * 100;
+        progressBar.style.width = `${progress}%`;
+      }, 200);
     }
-
-    function updateLyrics() {
-      const currentTime = audio.currentTime;
-      for (let i = 0; i < currentLyrics.length; i++) {
-        if (currentTime < currentLyrics[i].time) {
-          const line = currentLyrics[i - 1] || { text: '' };
-          lyricsDiv.innerHTML = '';
-          line.text.split(/(\s+)/).forEach((word, index) => {
-            const span = document.createElement('span');
-            span.className = 'word';
-            span.textContent = word;
-            lyricsDiv.appendChild(span);
-          });
-          break;
-        }
-      }
-    }
-
-    setInterval(() => {
-      if (!audio.paused) {
-        updateLyrics();
-        const pct = (audio.currentTime / audio.duration) * 100;
-        progress.style.width = pct + '%';
-      }
-    }, 100);
   </script>
 </body>
 </html>
