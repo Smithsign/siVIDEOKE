@@ -1,115 +1,150 @@
-const songCodeInput = document.getElementById("songCode");
-const lookupBtn = document.getElementById("lookupBtn");
-const playBtn = document.getElementById("playBtn");
-const stopBtn = document.getElementById("stopBtn");
-const lyricsContainer = document.getElementById("lyricsContainer");
-const audio = document.getElementById("audio");
-const volumeControl = document.getElementById("volume");
-const songTitle = document.getElementById("songTitle");
-const songArtist = document.getElementById("songArtist");
-const songDetails = document.getElementById("songDetails");
-const songList = document.getElementById("songList");
+const audio = document.getElementById("karaokeAudio");
+const lyricsContainer = document.getElementById("lyrics");
+const countdown = document.getElementById("countdown");
+const songInfo = document.getElementById("song-info");
+const volumeSlider = document.getElementById("volume");
 
 let lyrics = [];
-let animationId;
+let currentLine = 0;
+let interval;
+let isPlaying = false;
 
-fetch('songs.json')
-  .then(res => res.json())
-  .then(data => {
-    for (let code in data) {
-      const li = document.createElement("li");
-      li.textContent = `${code} – ${data[code].title} – ${data[code].artist}`;
-      songList.appendChild(li);
-    }
-
-    lookupBtn.addEventListener("click", () => {
-      const code = songCodeInput.value.trim();
-      const song = data[code];
-      if (song) {
-        songTitle.textContent = song.title;
-        songArtist.textContent = song.artist;
-        audio.src = song.file;
-        fetch(song.lyrics)
-          .then(res => res.text())
-          .then(text => {
-            lyrics = parseLRC(text);
-            songDetails.classList.remove("hidden");
-          });
-      } else {
-        alert("Song not found!");
-      }
-    });
-  });
-
-playBtn.addEventListener("click", () => {
-  lyricsContainer.innerHTML = '';
-  let i = 0;
-
-  const interval = setInterval(() => {
-    if (i < lyrics.length) {
-      lyricsContainer.innerHTML = lyrics[i].text;
-      i++;
-    } else {
-      clearInterval(interval);
-    }
-  }, 2000);
-
-  audio.play();
+// Load volume
+volumeSlider.addEventListener("input", () => {
+  audio.volume = volumeSlider.value;
 });
 
-stopBtn.addEventListener("click", () => {
-  audio.pause();
-  audio.currentTime = 0;
-  lyricsContainer.innerHTML = '';
-});
+// Song data
+const songs = {
+  "18252": {
+    title: "Pour It Up",
+    artist: "Rihanna",
+    audio: "pouritup.m4a",
+    lrc: "pouritup.lrc"
+  }
+};
 
-volumeControl.addEventListener("input", () => {
-  audio.volume = volumeControl.value;
-});
-
-function parseLRC(lrc) {
-  return lrc.split('\n').map(line => {
-    const match = line.match(/\[(\d+):(\d+\.\d+)\](.*)/);
-    if (match) {
-      const minutes = parseInt(match[1]);
-      const seconds = parseFloat(match[2]);
-      const time = minutes * 60 + seconds;
-      return { time, text: match[3] };
-    }
-  }).filter(Boolean);
+// Enter code with keypad
+function inputCode(num) {
+  const input = document.getElementById("songCode");
+  if (input.value.length < 5) input.value += num;
+}
+function clearCode() {
+  document.getElementById("songCode").value = "";
 }
 
-// Microphone Visualizer
+function loadSong() {
+  const code = document.getElementById("songCode").value;
+  if (songs[code]) {
+    const { title, artist, audio: audioFile, lrc } = songs[code];
+    songInfo.innerHTML = `<strong>${title}</strong> by ${artist}`;
+    audio.src = audioFile;
+    fetch(lrc)
+      .then(res => res.text())
+      .then(parseLRC);
+  } else {
+    songInfo.innerText = "Invalid code.";
+  }
+}
+
+function parseLRC(data) {
+  lyrics = [];
+  lyricsContainer.innerHTML = "";
+  const lines = data.split("\n");
+  for (let line of lines) {
+    const match = line.match(/\[(\d+):(\d+\.\d+)\](.*)/);
+    if (match) {
+      const min = parseInt(match[1]);
+      const sec = parseFloat(match[2]);
+      const time = min * 60 + sec;
+      const text = match[3].trim();
+      lyrics.push({ time, text });
+    }
+  }
+  lyrics.forEach(({ text }) => {
+    const span = document.createElement("span");
+    span.textContent = text;
+    lyricsContainer.appendChild(span);
+  });
+}
+
+function startKaraoke() {
+  if (!audio.src) return;
+  countdown.innerText = "3";
+  let count = 3;
+  const cdInterval = setInterval(() => {
+    count--;
+    countdown.innerText = count > 0 ? count : "";
+    if (count === 0) {
+      clearInterval(cdInterval);
+      audio.play();
+      isPlaying = true;
+      syncLyrics();
+    }
+  }, 1000);
+}
+
+function stopKaraoke() {
+  audio.pause();
+  audio.currentTime = 0;
+  clearInterval(interval);
+  resetLyrics();
+}
+
+function resetLyrics() {
+  const spans = lyricsContainer.querySelectorAll("span");
+  spans.forEach(s => s.classList.remove("active"));
+  currentLine = 0;
+}
+
+function syncLyrics() {
+  interval = setInterval(() => {
+    if (!isPlaying) return;
+    const currentTime = audio.currentTime;
+    for (let i = 0; i < lyrics.length; i++) {
+      if (
+        currentTime >= lyrics[i].time &&
+        (i === lyrics.length - 1 || currentTime < lyrics[i + 1].time)
+      ) {
+        if (currentLine !== i) {
+          const spans = lyricsContainer.querySelectorAll("span");
+          spans.forEach(s => s.classList.remove("active"));
+          spans[i].classList.add("active");
+          currentLine = i;
+        }
+        break;
+      }
+    }
+  }, 100);
+}
+
+// Mic visualizer
 navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
   const audioCtx = new AudioContext();
-  const source = audioCtx.createMediaStreamSource(stream);
   const analyser = audioCtx.createAnalyser();
-  source.connect(analyser);
+  const mic = audioCtx.createMediaStreamSource(stream);
+  mic.connect(analyser);
   analyser.fftSize = 256;
 
-  const canvas = document.getElementById("micVisualizer");
-  const ctx = canvas.getContext("2d");
   const bufferLength = analyser.frequencyBinCount;
   const dataArray = new Uint8Array(bufferLength);
+  const canvas = document.getElementById("mic-visualizer");
+  const ctx = canvas.getContext("2d");
 
   function draw() {
-    animationId = requestAnimationFrame(draw);
+    requestAnimationFrame(draw);
     analyser.getByteFrequencyData(dataArray);
-    ctx.fillStyle = "#111";
+    ctx.fillStyle = "#000";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-
     const barWidth = (canvas.width / bufferLength) * 2.5;
     let x = 0;
-
     for (let i = 0; i < bufferLength; i++) {
       const barHeight = dataArray[i] / 2;
-      ctx.fillStyle = `rgb(${255 - barHeight}, ${barHeight + 100}, 0)`;
+      ctx.fillStyle = `rgb(${barHeight + 100}, 100, 0)`;
       ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
       x += barWidth + 1;
     }
   }
 
   draw();
-}).catch(err => {
-  console.error("Mic access denied", err);
 });
