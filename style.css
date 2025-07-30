@@ -53,3 +53,25 @@ body {
 #song-list li:hover {
   color: orange;
 }
+
+.highlight {
+  color: orange;
+  font-weight: bold;
+  font-size: 1.5em;
+}
+#lyrics {
+  text-align: center;
+  margin-top: 40px;
+  min-height: 150px;
+}
+.song {
+  display: inline-block;
+  margin: 20px;
+  padding: 20px;
+  border: 2px solid #ffa500;
+  border-radius: 12px;
+  background: #fffbe6;
+  box-shadow: 0 0 12px #ffa50088;
+  text-align: center;
+}
+
