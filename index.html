@@ -4,40 +4,55 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>siVIDEOKE - Philippine Style Virtual Karaoke</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;700;900&display=swap">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div class="background-effects"></div>
+    
     <div class="videoke-machine">
         <div class="header">
             <h1>siVIDEOKE</h1>
+            <div class="decoration-lights">
+                <div class="light"></div>
+                <div class="light"></div>
+                <div class="light"></div>
+                <div class="light"></div>
+                <div class="light"></div>
+            </div>
         </div>
         
-        <div class="screen-container">
+        <div class="screen-container old-tv-effect">
             <div class="screen" id="display">
                 <div id="song-info"></div>
                 <div id="countdown"></div>
-                <div id="lyrics"></div>
+                <div id="mic-icon">🎤</div>
+                <div id="lyrics-container">
+                    <div id="lyrics"></div>
+                </div>
+                <div class="scanlines"></div>
+                <div class="falling-effects"></div>
             </div>
         </div>
         
         <div class="controls">
             <div class="number-pad">
-                <button class="num-btn" data-number="1">1</button>
-                <button class="num-btn" data-number="2">2</button>
-                <button class="num-btn" data-number="3">3</button>
-                <button class="num-btn" data-number="4">4</button>
-                <button class="num-btn" data-number="5">5</button>
-                <button class="num-btn" data-number="6">6</button>
-                <button class="num-btn" data-number="7">7</button>
-                <button class="num-btn" data-number="8">8</button>
-                <button class="num-btn" data-number="9">9</button>
-                <button class="num-btn" data-number="0">0</button>
+                <button class="num-btn arcade-btn btn-1" data-number="1">1</button>
+                <button class="num-btn arcade-btn btn-2" data-number="2">2</button>
+                <button class="num-btn arcade-btn btn-3" data-number="3">3</button>
+                <button class="num-btn arcade-btn btn-4" data-number="4">4</button>
+                <button class="num-btn arcade-btn btn-5" data-number="5">5</button>
+                <button class="num-btn arcade-btn btn-6" data-number="6">6</button>
+                <button class="num-btn arcade-btn btn-7" data-number="7">7</button>
+                <button class="num-btn arcade-btn btn-8" data-number="8">8</button>
+                <button class="num-btn arcade-btn btn-9" data-number="9">9</button>
+                <button class="num-btn arcade-btn btn-0" data-number="0">0</button>
             </div>
             
             <div class="action-buttons">
-                <button id="play-btn">PLAY</button>
-                <button id="stop-btn">STOP</button>
-                <button id="songbook-btn">SONG BOOK</button>
+                <button id="play-btn" class="arcade-btn btn-play">PLAY</button>
+                <button id="stop-btn" class="arcade-btn btn-stop">STOP</button>
+                <button id="songbook-btn" class="arcade-btn btn-songbook">SONG BOOK</button>
             </div>
             
             <div class="input-display" id="code-display"></div>
@@ -46,19 +61,25 @@
     
     <!-- Song Book Modal -->
     <div class="modal" id="songbook-modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2>Song Book</h2>
-            <table id="song-table">
-                <thead>
-                    <tr>
-                        <th>Code</th>
-                        <th>Title</th>
-                        <th>Artist</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
+        <div class="modal-content book-design">
+            <div class="book-cover">
+                <h2>siVIDEOKE</h2>
+                <p>Song Book</p>
+            </div>
+            <div class="book-content">
+                <span class="close">&times;</span>
+                <h2>Song Book</h2>
+                <table id="song-table">
+                    <thead>
+                        <tr>
+                            <th>Code</th>
+                            <th>Title</th>
+                            <th>Artist</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
         </div>
     </div>
     
