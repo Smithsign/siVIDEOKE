@@ -3,49 +3,55 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>PH Videoke</title>
+  <title>Videoke Arcade</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="karaoke-container">
-    <div class="screen">
-      <img src="mic.png" id="micImage" alt="Mic" />
-      <img src="cd.png" id="cdImage" class="cd" alt="CD" />
-      <div class="countdown" id="countdown">3</div>
-      <div id="lyricsDisplay"></div>
-      <div class="progress-bar"><div class="progress" id="progress"></div></div>
-    </div>
 
-    <div class="song-info" id="songInfo"></div>
+<div class="karaoke-container">
+  <div class="cd-area">
+    <img src="cd.png" alt="CD" class="cd" />
+  </div>
 
-    <div class="keypad">
-      <div class="code-display" id="codeDisplay">_ _ _ _ _</div>
-      <div class="buttons">
-        <button onclick="press(1)">1</button>
-        <button onclick="press(2)">2</button>
-        <button onclick="press(3)">3</button>
-        <button onclick="press(4)">4</button>
-        <button onclick="press(5)">5</button>
-        <button onclick="press(6)">6</button>
-        <button onclick="press(7)">7</button>
-        <button onclick="press(8)">8</button>
-        <button onclick="press(9)">9</button>
-        <button onclick="press(0)">0</button>
-        <button onclick="startSong()">PLAY</button>
-        <button onclick="resetInput()">STOP</button>
+  <div class="screen">
+    <div id="lyrics" class="lyrics"></div>
+    <div class="player-controls">
+      <div class="progress-bar" id="progress-bar">
+        <div class="progress" id="progress"></div>
       </div>
-    </div>
-
-    <div class="song-book">
-      <h3>🎤 Song Book</h3>
-      <ul>
-        <li>Pour It Up by Rihanna — 18252</li>
-        <!-- add more -->
-      </ul>
+      <span id="current-time">0:00</span> / <span id="duration">0:00</span>
     </div>
   </div>
 
-  <audio id="audio" src="PourItUp.m4a"></audio>
-  <script src="script.js"></script>
+  <div class="buttons">
+    <div class="keypad">
+      <button onclick="addNumber('1')">1</button>
+      <button onclick="addNumber('2')">2</button>
+      <button onclick="addNumber('3')">3</button>
+      <button onclick="addNumber('4')">4</button>
+      <button onclick="addNumber('5')">5</button>
+      <button onclick="addNumber('6')">6</button>
+      <button onclick="addNumber('7')">7</button>
+      <button onclick="addNumber('8')">8</button>
+      <button onclick="addNumber('9')">9</button>
+      <button onclick="clearInput()">C</button>
+      <button onclick="addNumber('0')">0</button>
+      <button onclick="searchSong()">OK</button>
+    </div>
+    <div class="input-display" id="songCodeDisplay"></div>
+    <div class="action-buttons">
+      <button onclick="startKaraoke()">PLAY</button>
+      <button onclick="stopKaraoke()">STOP</button>
+    </div>
+  </div>
+
+  <div class="songbook">
+    <h2>🎤 SONG BOOK</h2>
+    <p>18252 - Pour It Up by Rihanna</p>
+  </div>
+</div>
+
+<audio id="audio" src="pour_it_up.m4a"></audio>
+<script src="script.js"></script>
 </body>
 </html>
