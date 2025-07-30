@@ -1,113 +1,100 @@
 body {
-  background: #111;
-  color: white;
-  font-family: 'Arial Black', sans-serif;
+  font-family: 'Arial', sans-serif;
+  background: #000;
+  color: #fff;
+  text-align: center;
   margin: 0;
   padding: 0;
 }
 
-.karaoke-container {
-  max-width: 900px;
+.container {
+  max-width: 600px;
   margin: auto;
   padding: 20px;
-  text-align: center;
+}
+
+.title {
+  font-size: 2em;
+  margin-bottom: 10px;
+  color: #f90;
 }
 
 .screen {
-  background: black;
-  border: 5px solid orange;
-  padding: 20px;
+  background: #111;
+  padding: 15px;
   margin-bottom: 20px;
   border-radius: 10px;
-  position: relative;
 }
 
-.lyrics {
-  font-size: 1.8em;
-  line-height: 1.5;
-  height: 200px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
+#codeDisplay {
+  font-size: 1.5em;
+  margin-bottom: 10px;
+  background: #222;
+  padding: 10px;
+  border-radius: 5px;
+  color: #0f0;
 }
 
-.lyrics p {
-  transition: 0.3s;
-  opacity: 0.3;
+#countdown {
+  font-size: 2em;
+  margin-top: 10px;
+  color: #ff0;
 }
 
-.lyrics p.active {
-  color: orange;
+#lyrics {
+  list-style: none;
+  padding: 0;
+  margin-top: 10px;
+  font-size: 1.2em;
+}
+
+#lyrics li {
+  padding: 5px 0;
+  transition: all 0.3s;
+}
+
+#lyrics li.active {
+  color: #f90;
   font-weight: bold;
-  opacity: 1;
   transform: scale(1.1);
 }
 
-.buttons {
-  margin-top: 20px;
+.controls {
+  margin: 20px 0;
 }
 
-.keypad button, .action-buttons button {
+.number-pad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.number-pad button,
+.stop-btn {
+  padding: 15px;
   font-size: 1.2em;
-  margin: 5px;
-  padding: 10px 20px;
-  background: #333;
-  color: orange;
   border: none;
-  border-radius: 8px;
+  background: #444;
+  color: white;
+  border-radius: 5px;
   cursor: pointer;
+  transition: 0.2s;
 }
 
-.input-display {
-  font-size: 2em;
-  color: yellow;
-  margin: 10px 0;
-}
-
-.cd-area {
-  margin-bottom: 10px;
-}
-
-.cd {
-  width: 100px;
-  animation: spin 4s linear infinite;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0); }
-  100% { transform: rotate(360deg); }
+.number-pad button:hover,
+.stop-btn:hover {
+  background: #f90;
+  color: #000;
 }
 
 .songbook {
-  background: #222;
-  border: 2px dashed orange;
+  background: #111;
   padding: 10px;
   margin-top: 20px;
-  text-align: left;
-  max-height: 200px;
-  overflow-y: auto;
+  border-radius: 10px;
 }
 
-.player-controls {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-top: 10px;
-}
-
-.progress-bar {
-  width: 60%;
-  height: 10px;
-  background: #444;
-  border-radius: 5px;
-  margin: 0 10px;
-  position: relative;
-}
-
-.progress {
-  height: 10px;
-  background: orange;
-  border-radius: 5px;
-  width: 0%;
+.songbook h2 {
+  color: #0ff;
 }
