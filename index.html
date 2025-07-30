@@ -3,67 +3,48 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Orange Dynasty Karaoke</title>
+  <title>🍊 Orange Dynasty Karaoke 🐉</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div id="karaoke">
-    <header>
-      <h1>🐉 Orange Dynasty Karaoke 🍊</h1>
-    </header>
-
-    <!-- Background video like real videoke -->
-    <video id="bg-video" autoplay muted loop>
+  <div class="background-video">
+    <video autoplay muted loop>
       <source src="background.mp4" type="video/mp4" />
-      Your browser does not support the video tag.
     </video>
-
-    <!-- Karaoke screen -->
-    <div id="screen">
-      <div id="lyrics"></div>
-    </div>
-
-    <!-- CD Album -->
-    <div id="cd-cover">
-      <img src="cdcover.jpg" alt="CD Cover" />
-    </div>
-
-    <!-- Microphone Visualizer -->
-    <canvas id="mic-visualizer"></canvas>
-
-    <!-- Volume control -->
-    <label for="volumeControl">🎛 Volume</label>
-    <input type="range" id="volumeControl" min="0" max="1" step="0.01" value="0.8">
-
-    <!-- Countdown -->
-    <div id="countdown"></div>
-
-    <!-- Input Song Code -->
-    <div id="code-input">
-      <div id="code-display"></div>
-      <div class="buttons">
-        "1234567890".split("").forEach(n => {
-          document.write(`<button class="num-btn" data-num="${n}">${n}</button>`);
-        });
-        document.write(`<button id="clear">CLEAR</button>`);
-        document.write(`<button id="play">PLAY</button>`);
-        document.write(`<button id="stop">STOP</button>`);
-      </div>
-    </div>
-
-    <!-- Songbook -->
-    <div id="songbook">
-      <h2>📖 Song Book</h2>
-      <ul>
-        <li>18252 - Pour It Up by Rihanna</li>
-        <li>13433 - Shape of You by Ed Sheeran</li>
-      </ul>
-    </div>
-
-    <!-- Audio Player -->
-    <audio id="karaoke-audio"></audio>
   </div>
 
+  <div class="karaoke-container">
+    <h1 class="title">🍊 Orange Dynasty Karaoke 🐉</h1>
+
+    <div class="code-input">
+      <input type="text" id="songCode" placeholder="🎵 Enter Song Code (e.g. 18252)" maxlength="5" />
+      <button id="loadSongBtn">🎤 Load Song</button>
+    </div>
+
+    <div id="songInfo" class="song-info"></div>
+    <div id="countdown"></div>
+
+    <div class="lyrics-screen">
+      <ul id="lyrics"></ul>
+    </div>
+
+    <div class="controls">
+      <button id="playBtn">▶️ Play</button>
+      <button id="stopBtn">⏹ Stop</button>
+      <label>🔊 Volume: 
+        <input type="range" id="volume" min="0" max="1" step="0.01" value="0.8" />
+      </label>
+    </div>
+
+    <canvas id="micVisualizer"></canvas>
+
+    <div class="songbook">
+      <h2>📖 Song Book</h2>
+      <ul id="songList"></ul>
+    </div>
+  </div>
+
+  <audio id="audio" preload="auto"></audio>
   <script src="script.js"></script>
 </body>
 </html>
