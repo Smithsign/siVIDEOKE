@@ -15,25 +15,32 @@ document.addEventListener('DOMContentLoaded', function() {
     const closeModal = document.querySelector('.close');
     const songTableBody = document.querySelector('#song-table tbody');
     const fallingEffects = document.querySelector('.falling-effects');
-    const numberDisplay = document.createElement('div'); // For number display on screen
+    const numberDisplay = document.createElement('div');
     
     // Add number display to screen
     numberDisplay.id = 'number-display';
     numberDisplay.style.display = 'none';
     document.querySelector('.screen').prepend(numberDisplay);
 
-    // Number sound effects in Filipino
-    const numberSounds = {
-        '1': 'https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.mp3',
-        '2': 'https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.mp3',
-        '3': 'https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.mp3',
-        '4': 'https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.mp3',
-        '5': 'https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.mp3',
-        '6': 'https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.mp3',
-        '7': 'https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.mp3',
-        '8': 'https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.mp3',
-        '9': 'https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.mp3',
-        '0': 'https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.mp3'
+    // Online sound effects (no local files needed)
+    const soundEffects = {
+        numbers: {
+            '1': 'https://assets.mixkit.co/active-sounds/short-electronic-alarm-990.mp3',
+            '2': 'https://assets.mixkit.co/active-sounds/short-electronic-alarm-990.mp3',
+            '3': 'https://assets.mixkit.co/active-sounds/short-electronic-alarm-990.mp3',
+            '4': 'https://assets.mixkit.co/active-sounds/short-electronic-alarm-990.mp3',
+            '5': 'https://assets.mixkit.co/active-sounds/short-electronic-alarm-990.mp3',
+            '6': 'https://assets.mixkit.co/active-sounds/short-electronic-alarm-990.mp3',
+            '7': 'https://assets.mixkit.co/active-sounds/short-electronic-alarm-990.mp3',
+            '8': 'https://assets.mixkit.co/active-sounds/short-electronic-alarm-990.mp3',
+            '9': 'https://assets.mixkit.co/active-sounds/short-electronic-alarm-990.mp3',
+            '0': 'https://assets.mixkit.co/active-sounds/short-electronic-alarm-990.mp3'
+        },
+        countdown: 'https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.mp3',
+        stop: 'https://assets.mixkit.co/sfx/preview/mixkit-arcade-retro-game-over-213.mp3',
+        open: 'https://assets.mixkit.co/sfx/preview/mixkit-unlock-game-notification-253.mp3',
+        close: 'https://assets.mixkit.co/sfx/preview/mixkit-select-click-1109.mp3',
+        beep: 'https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.mp3'
     };
 
     // State variables
@@ -43,15 +50,12 @@ document.addEventListener('DOMContentLoaded', function() {
     let countdownInterval;
     let fallingElements = [];
     let activeLyricIndex = -1;
-    let nextLyricIndex = 0;
+    let lyricStartTime = 0;
+    let lyricEndTime = 0;
 
     // Create falling orange elements
     function createFallingElements() {
-        fallingElements.forEach(el => {
-            if (el.parentNode === fallingEffects) {
-                fallingEffects.removeChild(el);
-            }
-        });
+        fallingElements.forEach(el => fallingEffects.removeChild(el));
         fallingElements = [];
         
         for (let i = 0; i < 20; i++) {
@@ -69,17 +73,20 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Play number sound effect
-    function playNumberSound(number) {
-        const sound = new Audio(numberSounds[number]);
-        sound.volume = 0.7;
+    // Play sound effect from URL
+    function playSound(url, volume = 0.7) {
+        const sound = new Audio(url);
+        sound.volume = volume;
         sound.play().catch(e => console.log("Audio play failed:", e));
-        
-        // Display the number on screen briefly
+        return sound;
+    }
+
+    // Display number with animation
+    function showNumber(number) {
         numberDisplay.textContent = number;
         numberDisplay.style.display = 'block';
         numberDisplay.style.animation = 'none';
-        void numberDisplay.offsetWidth; // Trigger reflow
+        void numberDisplay.offsetWidth;
         numberDisplay.style.animation = 'numberPop 0.5s forwards';
         
         setTimeout(() => {
@@ -123,8 +130,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     currentCode += number;
                     codeDisplay.textContent = currentCode;
                     
-                    // Play number sound
-                    playNumberSound(number);
+                    // Play number sound and show on screen
+                    playSound(soundEffects.numbers[number]);
+                    showNumber(number);
                     
                     // Check if code matches any song
                     const matchedSong = songs.find(song => song.code === currentCode);
@@ -148,21 +156,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 lyricsDisplay.innerHTML = '';
                 micIcon.style.display = 'none';
                 activeLyricIndex = -1;
-                nextLyricIndex = 0;
                 
                 // Start countdown
                 let count = 3;
                 countdownDisplay.textContent = count;
                 countdownDisplay.style.display = 'block';
                 
-                // Countdown sound effect
-                const countdownSound = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.mp3');
-                
                 countdownInterval = setInterval(() => {
                     count--;
                     countdownDisplay.textContent = count;
-                    countdownSound.currentTime = 0;
-                    countdownSound.play();
+                    playSound(soundEffects.beep);
                     
                     if (count <= 0) {
                         clearInterval(countdownInterval);
@@ -191,31 +194,25 @@ document.addEventListener('DOMContentLoaded', function() {
                 lyricsDisplay.innerHTML = '';
                 currentSong = null;
                 activeLyricIndex = -1;
-                nextLyricIndex = 0;
                 
-                // Stop sound effect
-                const stopSound = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-arcade-retro-game-over-213.mp3');
-                stopSound.play();
+                playSound(soundEffects.stop);
             });
             
             // Song book button event listeners
             songbookButton.addEventListener('click', function() {
                 songbookModal.style.display = 'block';
-                const openSound = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-unlock-game-notification-253.mp3');
-                openSound.play();
+                playSound(soundEffects.open);
             });
             
             closeModal.addEventListener('click', function() {
                 songbookModal.style.display = 'none';
-                const closeSound = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-select-click-1109.mp3');
-                closeSound.play();
+                playSound(soundEffects.close);
             });
             
             window.addEventListener('click', function(event) {
                 if (event.target === songbookModal) {
                     songbookModal.style.display = 'none';
-                    const closeSound = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-select-click-1109.mp3');
-                    closeSound.play();
+                    playSound(soundEffects.close);
                 }
             });
         });
@@ -224,9 +221,13 @@ document.addEventListener('DOMContentLoaded', function() {
     function startPlayback() {
         if (!currentSong) return;
         
+        // Reset lyrics state
+        activeLyricIndex = -1;
+        lyricsDisplay.innerHTML = '';
+        audioPlayer.currentTime = 0;
+        
         // Load audio
         audioPlayer.src = currentSong.audioFile;
-        audioPlayer.play();
         
         // Load lyrics
         fetch(currentSong.lyricsFile)
@@ -235,8 +236,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 lyricsData = parseLRC(text);
                 displayLyrics();
                 
-                // Update lyrics in sync with audio
-                audioPlayer.addEventListener('timeupdate', syncLyrics);
+                // Start playback
+                audioPlayer.play()
+                    .then(() => {
+                        audioPlayer.addEventListener('timeupdate', syncLyrics);
+                        audioPlayer.addEventListener('seeked', syncLyrics);
+                    })
+                    .catch(e => console.error("Audio playback failed:", e));
             });
     }
     
@@ -244,7 +250,6 @@ document.addEventListener('DOMContentLoaded', function() {
     function parseLRC(lrcText) {
         const lines = lrcText.split('\n');
         const lyrics = [];
-        
         const timeRegex = /\[(\d+):(\d+\.\d+)\]/;
         
         lines.forEach(line => {
@@ -256,12 +261,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 const text = line.replace(timeRegex, '').trim();
                 
                 if (text) {
-                    lyrics.push({ time, text });
+                    lyrics.push({ 
+                        time: parseFloat(time.toFixed(3)),
+                        text 
+                    });
                 }
             }
         });
         
-        return lyrics;
+        return lyrics.sort((a, b) => a.time - b.time);
     }
     
     // Function to display lyrics
@@ -276,7 +284,6 @@ document.addEventListener('DOMContentLoaded', function() {
             lyricsDisplay.appendChild(p);
         });
         
-        // Center the lyrics container
         centerLyrics();
     }
     
@@ -287,96 +294,95 @@ document.addEventListener('DOMContentLoaded', function() {
         lyricsDisplay.style.top = `${(containerHeight - lyricsHeight) / 2}px`;
     }
     
-   // Replace the syncLyrics and related functions with these improved versions
-
-// Function to sync lyrics with audio
-function syncLyrics() {
-    const currentTime = audioPlayer.currentTime;
-    
-    // Find the current active lyric
-    let newActiveIndex = -1;
-    for (let i = 0; i < lyricsData.length; i++) {
-        if (lyricsData[i].time <= currentTime) {
-            newActiveIndex = i;
-        } else {
-            break;
-        }
-    }
-
-    // Only update if the active lyric changed
-    if (newActiveIndex !== activeLyricIndex) {
-        activeLyricIndex = newActiveIndex;
-        updateLyricsDisplay();
+    // Precise lyrics synchronization
+    function syncLyrics() {
+        const currentTime = parseFloat(audioPlayer.currentTime.toFixed(3));
+        let newActiveIndex = -1;
         
-        // Smooth scroll to the active line
+        // Find the current active lyric
+        for (let i = 0; i < lyricsData.length; i++) {
+            if (currentTime >= lyricsData[i].time) {
+                newActiveIndex = i;
+            } else {
+                break;
+            }
+        }
+        
+        // Update if lyric changed
+        if (newActiveIndex !== activeLyricIndex) {
+            activeLyricIndex = newActiveIndex;
+            updateLyricsDisplay(currentTime);
+            
+            if (activeLyricIndex >= 0) {
+                scrollToActiveLine();
+            }
+        }
+        
+        // Update character highlighting
         if (activeLyricIndex >= 0) {
-            const activeLine = lyricsDisplay.querySelector(`p[data-index="${activeLyricIndex}"]`);
-            if (activeLine) {
-                const containerHeight = lyricsContainer.clientHeight;
-                const lineTop = activeLine.offsetTop;
-                const lineHeight = activeLine.clientHeight;
-                const targetScroll = lineTop + lineHeight/2 - containerHeight/2;
+            highlightCurrentCharacters(currentTime);
+        }
+    }
+    
+    // Function to update lyrics display states
+    function updateLyricsDisplay(currentTime) {
+        const lines = lyricsDisplay.querySelectorAll('p');
+        
+        lines.forEach((line, index) => {
+            line.classList.remove('active', 'passed', 'upcoming');
+            line.innerHTML = line.textContent;
+            
+            if (index < activeLyricIndex) {
+                line.classList.add('passed');
+            } else if (index === activeLyricIndex) {
+                line.classList.add('active');
+                lyricStartTime = lyricsData[index].time;
+                lyricEndTime = (index < lyricsData.length - 1) ? 
+                    lyricsData[index + 1].time : lyricStartTime + 5;
+            } else {
+                line.classList.add('upcoming');
+            }
+        });
+    }
+    
+    // Function to highlight characters in current line
+    function highlightCurrentCharacters(currentTime) {
+        const activeLine = lyricsDisplay.querySelector(`p[data-index="${activeLyricIndex}"]`);
+        if (!activeLine) return;
+        
+        const progress = (currentTime - lyricStartTime) / (lyricEndTime - lyricStartTime);
+        const text = activeLine.textContent;
+        const charsToHighlight = Math.floor(text.length * progress);
+        
+        if (charsToHighlight > (activeLine.querySelectorAll('.sung').length || 0)) {
+            activeLine.innerHTML = '';
+            
+            for (let i = 0; i < text.length; i++) {
+                const charSpan = document.createElement('span');
+                charSpan.textContent = text[i];
                 
-                lyricsDisplay.style.transition = 'transform 0.5s ease-out';
-                lyricsDisplay.style.transform = `translateY(${-targetScroll}px)`;
+                if (i < charsToHighlight) {
+                    charSpan.classList.add('sung');
+                }
+                
+                activeLine.appendChild(charSpan);
             }
         }
     }
-}
-
-// Function to update lyrics display with karaoke highlighting
-function updateLyricsDisplay() {
-    const lines = lyricsDisplay.querySelectorAll('p');
-    const currentTime = audioPlayer.currentTime;
     
-    lines.forEach((line, index) => {
-        // Clear previous states
-        line.classList.remove('active', 'passed', 'upcoming');
-        line.innerHTML = line.textContent; // Reset any character spans
+    // Function to scroll to active line
+    function scrollToActiveLine() {
+        const activeLine = lyricsDisplay.querySelector(`p[data-index="${activeLyricIndex}"]`);
+        if (!activeLine) return;
         
-        if (index < activeLyricIndex) {
-            line.classList.add('passed');
-        } 
-        else if (index === activeLyricIndex) {
-            line.classList.add('active');
-            
-            // Get the current lyric's timing information
-            const lyricStartTime = lyricsData[index].time;
-            let lyricEndTime = currentTime + 1; // Default end time
-            
-            // If there's a next lyric, use its start time as end time
-            if (index < lyricsData.length - 1) {
-                lyricEndTime = lyricsData[index + 1].time;
-            }
-            
-            // Calculate progress through current lyric (0 to 1)
-            const lyricProgress = (currentTime - lyricStartTime) / (lyricEndTime - lyricStartTime);
-            
-            // Apply karaoke-style character highlighting
-            if (lyricProgress > 0) {
-                const text = line.textContent;
-                line.innerHTML = '';
-                
-                for (let i = 0; i < text.length; i++) {
-                    const charSpan = document.createElement('span');
-                    charSpan.textContent = text[i];
-                    
-                    // Calculate when this character should be highlighted
-                    const charProgress = i / text.length;
-                    
-                    if (charProgress < lyricProgress) {
-                        charSpan.classList.add('sung');
-                    }
-                    
-                    line.appendChild(charSpan);
-                }
-            }
-        }
-        else {
-            line.classList.add('upcoming');
-        }
-    });
-}
+        const containerHeight = lyricsContainer.clientHeight;
+        const lineTop = activeLine.offsetTop;
+        const lineHeight = activeLine.clientHeight;
+        const targetScroll = lineTop + lineHeight/2 - containerHeight/2;
+        
+        lyricsDisplay.style.transition = 'transform 0.5s ease-out';
+        lyricsDisplay.style.transform = `translateY(${-targetScroll}px)`;
+    }
     
     // Keyboard support
     document.addEventListener('keydown', function(e) {
