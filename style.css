@@ -1,0 +1,101 @@
+body {
+  background: radial-gradient(circle at top, #000000 0%, #1a1a1a 100%);
+  color: #fff;
+  font-family: 'Courier New', monospace;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.videoke-container {
+  max-width: 900px;
+  width: 100%;
+  background: #111;
+  border: 8px solid #f0c000;
+  border-radius: 20px;
+  box-shadow: 0 0 30px #f0c000;
+  padding: 10px;
+}
+
+.machine-frame {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.top-panel,
+.bottom-panel {
+  background: #f0c000;
+  color: #000;
+  font-weight: bold;
+  font-size: 20px;
+  padding: 10px;
+  text-align: center;
+  border-radius: 8px;
+  text-shadow: 1px 1px 2px #ff0;
+}
+
+.screen {
+  background: #000;
+  border: 5px solid #ff0066;
+  border-radius: 10px;
+  padding: 10px;
+  position: relative;
+  height: 400px;
+}
+
+#player {
+  width: 100%;
+  height: 70%;
+  border-radius: 10px;
+}
+
+.lyrics-display {
+  margin-top: 10px;
+  font-size: 24px;
+  color: #00ffcc;
+  text-shadow: 2px 2px #000;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 10px;
+  border-radius: 8px;
+}
+
+.controls {
+  text-align: center;
+}
+
+#search {
+  padding: 10px;
+  width: 80%;
+  max-width: 500px;
+  font-size: 18px;
+  margin-bottom: 10px;
+  border: none;
+  border-radius: 8px;
+}
+
+.song-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+.song-card {
+  background: #222;
+  padding: 10px;
+  border: 2px solid #00ccff;
+  color: #fff;
+  border-radius: 10px;
+  cursor: pointer;
+  width: 200px;
+  transition: transform 0.2s, background 0.2s;
+}
+.song-card:hover {
+  transform: scale(1.05);
+  background: #00ccff;
+  color: #000;
+}
