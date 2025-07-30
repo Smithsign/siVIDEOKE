@@ -3,57 +3,49 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Videoke Arcade</title>
+  <title>PH Videoke</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="container">
+  <div class="karaoke-container">
     <div class="screen">
-      <div class="cd-container">
-        <img src="cd.png" alt="CD Cover" class="cd" />
-      </div>
-      <div id="countdown" class="countdown">3</div>
-      <div class="lyrics-container" id="lyrics-container"></div>
-      <div class="player-info">
-        <div id="song-title">Waiting for song...</div>
-        <div id="progress-bar">
-          <div id="progress"></div>
-        </div>
+      <img src="mic.png" id="micImage" alt="Mic" />
+      <img src="cd.png" id="cdImage" class="cd" alt="CD" />
+      <div class="countdown" id="countdown">3</div>
+      <div id="lyricsDisplay"></div>
+      <div class="progress-bar"><div class="progress" id="progress"></div></div>
+    </div>
+
+    <div class="song-info" id="songInfo"></div>
+
+    <div class="keypad">
+      <div class="code-display" id="codeDisplay">_ _ _ _ _</div>
+      <div class="buttons">
+        <button onclick="press(1)">1</button>
+        <button onclick="press(2)">2</button>
+        <button onclick="press(3)">3</button>
+        <button onclick="press(4)">4</button>
+        <button onclick="press(5)">5</button>
+        <button onclick="press(6)">6</button>
+        <button onclick="press(7)">7</button>
+        <button onclick="press(8)">8</button>
+        <button onclick="press(9)">9</button>
+        <button onclick="press(0)">0</button>
+        <button onclick="startSong()">PLAY</button>
+        <button onclick="resetInput()">STOP</button>
       </div>
     </div>
 
-    <div class="right-side">
-      <img src="mic.png" class="mic" />
-      <div class="songbook">
-        <h2>🎵 SONG BOOK 🎵</h2>
-        <ul>
-          <li>18252 — POUR IT UP by Rihanna</li>
-          <!-- Add more songs here -->
-        </ul>
-      </div>
-      <div class="controls">
-        <input type="text" id="songCode" placeholder="Enter Song Code" maxlength="5" />
-        <div class="num-pad">
-          <button class="num">1</button>
-          <button class="num">2</button>
-          <button class="num">3</button>
-          <button class="num">4</button>
-          <button class="num">5</button>
-          <button class="num">6</button>
-          <button class="num">7</button>
-          <button class="num">8</button>
-          <button class="num">9</button>
-          <button class="num">0</button>
-        </div>
-        <div class="action-buttons">
-          <button id="playBtn">PLAY</button>
-          <button id="stopBtn">STOP</button>
-        </div>
-      </div>
+    <div class="song-book">
+      <h3>🎤 Song Book</h3>
+      <ul>
+        <li>Pour It Up by Rihanna — 18252</li>
+        <!-- add more -->
+      </ul>
     </div>
   </div>
 
-  <audio id="audio" src="pour_it_up.m4a"></audio>
+  <audio id="audio" src="PourItUp.m4a"></audio>
   <script src="script.js"></script>
 </body>
 </html>
