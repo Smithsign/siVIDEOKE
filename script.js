@@ -1,163 +1,99 @@
-const songDatabase = {
-  "18252": {
-    title: "Pour It Up",
-    artist: "Rihanna",
-    file: "pouritup.m4a",
-    lyrics: `
-[00:00.00] Throw it up, throw it up
-[00:02.00] Watch it all fall out
-[00:04.00] Throw it up, throw it up
-[00:06.00] That's how we ball out
+const lyrics = [
+  { time: 0, text: "Throw it up, throw it up" },
+  { time: 4, text: "Watch it all fall out" },
+  { time: 8, text: "Pour it up, pour it up" },
+  { time: 12, text: "That's how we ball out" },
+  { time: 16, text: "Strip clubs and dollar bills" },
+  { time: 20, text: "Still got more money" },
+  { time: 24, text: "Patron shots can I get a refill?" },
+  { time: 28, text: "Still got more money" },
+  { time: 32, text: "Strippers going up and down that pole" },
+  { time: 36, text: "And I still got more money" },
+  { time: 40, text: "4 o'clock and we ain't going home" },
+  { time: 44, text: "Still got more money" }
+];
 
-[00:08.00] Strip clubs and dollar bills
-[00:10.00] I still got mo' money
-[00:12.00] Patron shots can I get a refill?
-[00:14.00] I still got mo' money
+const audio = document.getElementById('audio');
+const lyricsContainer = document.getElementById('lyrics-container');
+const progress = document.getElementById('progress');
+const countdownEl = document.getElementById('countdown');
+const songInput = document.getElementById('songCode');
+const songTitle = document.getElementById('song-title');
 
-[00:16.00] Strippers goin' up and down that pole
-[00:18.00] And I still got mo' money
-[00:20.00] 4 o'clock and we ain't going home
-[00:22.00] 'Cause I still got mo' money
+document.querySelectorAll('.num').forEach(button => {
+  button.onclick = () => songInput.value += button.textContent;
+});
 
-[00:24.00] Money make the world go round
-[00:26.00] I still got mo' money
-[00:28.00] Bands make your girl go down
-[00:30.00] I still got mo' money
-
-[00:32.00] Lot more where that came from
-[00:34.00] I still got mo' money
-[00:36.00] Look in your eyes I know you want some
-[00:38.00] I still got mo' money
-`
+document.getElementById('playBtn').onclick = () => {
+  const code = songInput.value;
+  if (code === '18252') {
+    songTitle.textContent = 'POUR IT UP by Rihanna';
+    startCountdown(() => {
+      playSong();
+    });
   }
 };
 
-let currentAudio = null;
-let lyricsLines = [];
-let currentLine = 0;
-let isPlaying = false;
+document.getElementById('stopBtn').onclick = () => {
+  audio.pause();
+  audio.currentTime = 0;
+  clearLyrics();
+  songTitle.textContent = 'Waiting for song...';
+};
 
-// DOM
-const screen = document.getElementById("screen");
-const titleEl = document.getElementById("song-title");
-const artistEl = document.getElementById("song-artist");
-const lyricsEl = document.getElementById("lyrics");
-const playerInput = document.getElementById("code-input");
-const cdCover = document.getElementById("cd");
-const indicator = document.getElementById("progress");
-const countdown = document.getElementById("countdown");
-
-// Virtual keypad input
-function press(num) {
-  if (playerInput.value.length < 5) {
-    playerInput.value += num;
-  }
-}
-
-// Load song info
-function loadSong() {
-  const code = playerInput.value;
-  const song = songDatabase[code];
-  if (!song) {
-    alert("Invalid code!");
-    return;
-  }
-
-  titleEl.textContent = song.title;
-  artistEl.textContent = song.artist;
-
-  if (currentAudio) {
-    currentAudio.pause();
-  }
-
-  currentAudio = new Audio(song.file);
-  currentAudio.addEventListener("timeupdate", syncLyrics);
-  currentAudio.addEventListener("ended", () => {
-    isPlaying = false;
-    cdCover.classList.remove("spinning");
-  });
-
-  loadLyrics(song.lyrics);
-  indicator.max = 100;
-}
-
-// Parse lyrics
-function loadLyrics(raw) {
-  lyricsLines = raw.trim().split("\n").map(line => {
-    const match = line.match(/\[(\d+):(\d+\.\d+)\](.+)/);
-    if (match) {
-      const time = parseInt(match[1]) * 60 + parseFloat(match[2]);
-      return { time, text: match[3] };
-    }
-    return null;
-  }).filter(Boolean);
-  currentLine = 0;
-  renderLyrics();
-}
-
-// Render all lyrics initially
-function renderLyrics() {
-  lyricsEl.innerHTML = lyricsLines.map((line, idx) => {
-    return `<div class="lyric-line" id="line-${idx}">${line.text}</div>`;
-  }).join("");
-}
-
-// Highlight current lyric line
-function syncLyrics() {
-  const currentTime = currentAudio.currentTime;
-
-  for (let i = 0; i < lyricsLines.length; i++) {
-    if (currentTime >= lyricsLines[i].time) {
-      currentLine = i;
-    }
-  }
-
-  lyricsLines.forEach((line, i) => {
-    const el = document.getElementById(`line-${i}`);
-    if (i === currentLine) {
-      el.classList.add("active");
-      el.scrollIntoView({ behavior: "smooth", block: "center" });
-    } else {
-      el.classList.remove("active");
-    }
-  });
-
-  // Update progress bar
-  if (currentAudio.duration) {
-    const progressPercent = (currentAudio.currentTime / currentAudio.duration) * 100;
-    indicator.value = progressPercent;
-  }
-}
-
-// Play song with countdown
-function playSong() {
-  const code = playerInput.value;
-  const song = songDatabase[code];
-  if (!song) return alert("Enter a valid code first!");
-
-  countdown.style.display = "block";
-  countdown.textContent = "3";
-  cdCover.classList.add("spinning");
-
-  let i = 2;
+function startCountdown(callback) {
+  let count = 3;
+  countdownEl.style.display = 'block';
+  countdownEl.textContent = count;
   const interval = setInterval(() => {
-    countdown.textContent = i;
-    i--;
-    if (i < 0) {
+    count--;
+    countdownEl.textContent = count;
+    if (count <= 0) {
       clearInterval(interval);
-      countdown.style.display = "none";
-      isPlaying = true;
-      currentAudio.play();
+      countdownEl.style.display = 'none';
+      callback();
     }
   }, 1000);
 }
 
-// Stop song
-function stopSong() {
-  if (currentAudio) {
-    currentAudio.pause();
-    currentAudio.currentTime = 0;
-    isPlaying = false;
-    cdCover.classList.remove("spinning");
-  }
+function playSong() {
+  audio.play();
+  renderLyrics();
+  const interval = setInterval(() => {
+    updateLyrics(audio.currentTime);
+    updateProgress();
+    if (audio.ended) clearInterval(interval);
+  }, 300);
+}
+
+function renderLyrics() {
+  lyricsContainer.innerHTML = '';
+  lyrics.forEach((line, i) => {
+    const div = document.createElement('div');
+    div.className = 'line';
+    div.id = 'line-' + i;
+    div.textContent = line.text;
+    lyricsContainer.appendChild(div);
+  });
+}
+
+function updateLyrics(currentTime) {
+  lyrics.forEach((line, i) => {
+    const lineEl = document.getElementById('line-' + i);
+    if (currentTime >= line.time && (!lyrics[i + 1] || currentTime < lyrics[i + 1].time)) {
+      document.querySelectorAll('.line').forEach(el => el.classList.remove('active'));
+      lineEl.classList.add('active');
+      lyricsContainer.scrollTop = lineEl.offsetTop - lyricsContainer.offsetTop - 100;
+    }
+  });
+}
+
+function updateProgress() {
+  const percent = (audio.currentTime / audio.duration) * 100;
+  progress.style.width = percent + '%';
+}
+
+function clearLyrics() {
+  lyricsContainer.innerHTML = '';
+  progress.style.width = '0%';
 }
