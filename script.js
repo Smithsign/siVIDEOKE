@@ -1,111 +1,115 @@
-let songCode = '';
-let audio = document.getElementById('audio');
-let lyrics = document.getElementById('lyrics');
-let countdown = document.getElementById('countdown');
-let codeDisplay = document.getElementById('codeDisplay');
-let lyricLines = [];
-let lyricTimers = [];
-let songData = {
-  '18252': {
-    title: 'Pour It Up',
-    file: 'pouritup.m4a',
-    lrc: 'pouritup.lrc'
-  }
-};
+const songCodeInput = document.getElementById("songCode");
+const lookupBtn = document.getElementById("lookupBtn");
+const playBtn = document.getElementById("playBtn");
+const stopBtn = document.getElementById("stopBtn");
+const lyricsContainer = document.getElementById("lyricsContainer");
+const audio = document.getElementById("audio");
+const volumeControl = document.getElementById("volume");
+const songTitle = document.getElementById("songTitle");
+const songArtist = document.getElementById("songArtist");
+const songDetails = document.getElementById("songDetails");
+const songList = document.getElementById("songList");
 
-function press(num) {
-  if (songCode.length < 5) {
-    songCode += num;
-    codeDisplay.innerText = songCode;
-  }
-}
+let lyrics = [];
+let animationId;
 
-function clearCode() {
-  songCode = '';
-  codeDisplay.innerText = 'ENTER SONG CODE';
-}
+fetch('songs.json')
+  .then(res => res.json())
+  .then(data => {
+    for (let code in data) {
+      const li = document.createElement("li");
+      li.textContent = `${code} – ${data[code].title} – ${data[code].artist}`;
+      songList.appendChild(li);
+    }
 
-function stopSong() {
+    lookupBtn.addEventListener("click", () => {
+      const code = songCodeInput.value.trim();
+      const song = data[code];
+      if (song) {
+        songTitle.textContent = song.title;
+        songArtist.textContent = song.artist;
+        audio.src = song.file;
+        fetch(song.lyrics)
+          .then(res => res.text())
+          .then(text => {
+            lyrics = parseLRC(text);
+            songDetails.classList.remove("hidden");
+          });
+      } else {
+        alert("Song not found!");
+      }
+    });
+  });
+
+playBtn.addEventListener("click", () => {
+  lyricsContainer.innerHTML = '';
+  let i = 0;
+
+  const interval = setInterval(() => {
+    if (i < lyrics.length) {
+      lyricsContainer.innerHTML = lyrics[i].text;
+      i++;
+    } else {
+      clearInterval(interval);
+    }
+  }, 2000);
+
+  audio.play();
+});
+
+stopBtn.addEventListener("click", () => {
   audio.pause();
   audio.currentTime = 0;
-  clearLyrics();
-  clearTimeouts();
-  clearCode();
-}
+  lyricsContainer.innerHTML = '';
+});
 
-function playSong() {
-  if (!songData[songCode]) {
-    alert("Invalid song code!");
-    return;
-  }
+volumeControl.addEventListener("input", () => {
+  audio.volume = volumeControl.value;
+});
 
-  codeDisplay.innerText = `🎵 ${songData[songCode].title} 🎵`;
-  countdown.innerText = '3';
-
-  let count = 3;
-  let interval = setInterval(() => {
-    count--;
-    countdown.innerText = count > 0 ? count : '';
-    if (count <= 0) {
-      clearInterval(interval);
-      startPlayback(songData[songCode]);
-    }
-  }, 1000);
-}
-
-function startPlayback(song) {
-  audio.src = song.file;
-  fetch(song.lrc)
-    .then(res => res.text())
-    .then(text => {
-      parseLRC(text);
-      displayLyrics();
-      audio.play();
-      syncLyrics();
-    });
-}
-
-function parseLRC(lrcText) {
-  lyricLines = [];
-  const lines = lrcText.split('\n');
-  for (let line of lines) {
-    const match = line.match(/\[(\d+):(\d+\.?\d*)\](.+)/);
+function parseLRC(lrc) {
+  return lrc.split('\n').map(line => {
+    const match = line.match(/\[(\d+):(\d+\.\d+)\](.*)/);
     if (match) {
-      const time = parseInt(match[1]) * 60 + parseFloat(match[2]);
-      const text = match[3].trim();
-      lyricLines.push({ time, text });
+      const minutes = parseInt(match[1]);
+      const seconds = parseFloat(match[2]);
+      const time = minutes * 60 + seconds;
+      return { time, text: match[3] };
+    }
+  }).filter(Boolean);
+}
+
+// Microphone Visualizer
+navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+  const audioCtx = new AudioContext();
+  const source = audioCtx.createMediaStreamSource(stream);
+  const analyser = audioCtx.createAnalyser();
+  source.connect(analyser);
+  analyser.fftSize = 256;
+
+  const canvas = document.getElementById("micVisualizer");
+  const ctx = canvas.getContext("2d");
+  const bufferLength = analyser.frequencyBinCount;
+  const dataArray = new Uint8Array(bufferLength);
+
+  function draw() {
+    animationId = requestAnimationFrame(draw);
+    analyser.getByteFrequencyData(dataArray);
+    ctx.fillStyle = "#111";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    const barWidth = (canvas.width / bufferLength) * 2.5;
+    let x = 0;
+
+    for (let i = 0; i < bufferLength; i++) {
+      const barHeight = dataArray[i] / 2;
+      ctx.fillStyle = `rgb(${255 - barHeight}, ${barHeight + 100}, 0)`;
+      ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
+      x += barWidth + 1;
     }
   }
-}
 
-function displayLyrics() {
-  lyrics.innerHTML = '';
-  lyricLines.forEach((line, index) => {
-    const li = document.createElement('li');
-    li.textContent = line.text;
-    li.id = 'line-' + index;
-    lyrics.appendChild(li);
-  });
-}
-
-function syncLyrics() {
-  lyricLines.forEach((line, index) => {
-    const timeout = setTimeout(() => {
-      const previous = document.querySelector('.active');
-      if (previous) previous.classList.remove('active');
-
-      const current = document.getElementById('line-' + index);
-      if (current) current.classList.add('active');
-    }, line.time * 1000);
-    lyricTimers.push(timeout);
-  });
-}
-
-function clearLyrics() {
-  lyrics.innerHTML = '';
-}
-
-function clearTimeouts() {
-  lyricTimers.forEach(t => clearTimeout(t));
-  lyricTimers = [];
-}
+  draw();
+}).catch(err => {
+  console.error("Mic access denied", err);
+});
