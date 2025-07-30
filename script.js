@@ -15,17 +15,38 @@ document.addEventListener('DOMContentLoaded', function() {
     const closeModal = document.querySelector('.close');
     const songTableBody = document.querySelector('#song-table tbody');
     const fallingEffects = document.querySelector('.falling-effects');
+    const numberDisplay = document.createElement('div'); // For number display on screen
     
+    // Add number display to screen
+    numberDisplay.id = 'number-display';
+    numberDisplay.style.display = 'none';
+    document.querySelector('.screen').prepend(numberDisplay);
+
+    // Number sound effects in Filipino
+    const numberSounds = {
+        '1': 'https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.mp3',
+        '2': 'https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.mp3',
+        '3': 'https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.mp3',
+        '4': 'https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.mp3',
+        '5': 'https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.mp3',
+        '6': 'https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.mp3',
+        '7': 'https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.mp3',
+        '8': 'https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.mp3',
+        '9': 'https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.mp3',
+        '0': 'https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.mp3'
+    };
+
     // State variables
     let currentCode = '';
     let currentSong = null;
     let lyricsData = [];
     let countdownInterval;
     let fallingElements = [];
-    
+    let activeLyricIndex = -1;
+    let nextLyricIndex = 0;
+
     // Create falling orange elements
     function createFallingElements() {
-        // Clear existing elements
         fallingElements.forEach(el => {
             if (el.parentNode === fallingEffects) {
                 fallingEffects.removeChild(el);
@@ -33,7 +54,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         fallingElements = [];
         
-        // Create new elements
         for (let i = 0; i < 20; i++) {
             const el = document.createElement('div');
             el.className = 'falling-element';
@@ -48,7 +68,25 @@ document.addEventListener('DOMContentLoaded', function() {
             fallingElements.push(el);
         }
     }
-    
+
+    // Play number sound effect
+    function playNumberSound(number) {
+        const sound = new Audio(numberSounds[number]);
+        sound.volume = 0.7;
+        sound.play().catch(e => console.log("Audio play failed:", e));
+        
+        // Display the number on screen briefly
+        numberDisplay.textContent = number;
+        numberDisplay.style.display = 'block';
+        numberDisplay.style.animation = 'none';
+        void numberDisplay.offsetWidth; // Trigger reflow
+        numberDisplay.style.animation = 'numberPop 0.5s forwards';
+        
+        setTimeout(() => {
+            numberDisplay.style.display = 'none';
+        }, 500);
+    }
+
     // Load songs and initialize
     fetch('songs.json')
         .then(response => response.json())
@@ -67,11 +105,15 @@ document.addEventListener('DOMContentLoaded', function() {
                     currentSong = song;
                     songInfoDisplay.textContent = `${song.title} - ${song.artist}`;
                     songbookModal.style.display = 'none';
+                    
+                    // Visual feedback
+                    codeDisplay.style.animation = 'none';
+                    void codeDisplay.offsetWidth;
+                    codeDisplay.style.animation = 'pulse 0.5s';
                 });
                 songTableBody.appendChild(row);
             });
             
-            // Create falling elements
             createFallingElements();
             
             // Number button event listeners
@@ -81,15 +123,18 @@ document.addEventListener('DOMContentLoaded', function() {
                     currentCode += number;
                     codeDisplay.textContent = currentCode;
                     
+                    // Play number sound
+                    playNumberSound(number);
+                    
                     // Check if code matches any song
                     const matchedSong = songs.find(song => song.code === currentCode);
                     if (matchedSong) {
                         currentSong = matchedSong;
                         songInfoDisplay.textContent = `${matchedSong.title} - ${matchedSong.artist}`;
                         
-                        // Add visual feedback
+                        // Visual feedback
                         codeDisplay.style.animation = 'none';
-                        void codeDisplay.offsetWidth; // Trigger reflow
+                        void codeDisplay.offsetWidth;
                         codeDisplay.style.animation = 'pulse 0.5s';
                     }
                 });
@@ -102,14 +147,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Reset display
                 lyricsDisplay.innerHTML = '';
                 micIcon.style.display = 'none';
+                activeLyricIndex = -1;
+                nextLyricIndex = 0;
                 
                 // Start countdown
                 let count = 3;
                 countdownDisplay.textContent = count;
                 countdownDisplay.style.display = 'block';
                 
-                // Add sound effect for countdown
-                const countdownSound = new Audio('data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU...'); // Short beep sound
+                // Countdown sound effect
+                const countdownSound = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.mp3');
                 
                 countdownInterval = setInterval(() => {
                     count--;
@@ -143,24 +190,32 @@ document.addEventListener('DOMContentLoaded', function() {
                 songInfoDisplay.textContent = '';
                 lyricsDisplay.innerHTML = '';
                 currentSong = null;
+                activeLyricIndex = -1;
+                nextLyricIndex = 0;
                 
-                // Add sound effect
-                const stopSound = new Audio('data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU...'); // Short stop sound
+                // Stop sound effect
+                const stopSound = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-arcade-retro-game-over-213.mp3');
                 stopSound.play();
             });
             
             // Song book button event listeners
             songbookButton.addEventListener('click', function() {
                 songbookModal.style.display = 'block';
+                const openSound = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-unlock-game-notification-253.mp3');
+                openSound.play();
             });
             
             closeModal.addEventListener('click', function() {
                 songbookModal.style.display = 'none';
+                const closeSound = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-select-click-1109.mp3');
+                closeSound.play();
             });
             
             window.addEventListener('click', function(event) {
                 if (event.target === songbookModal) {
                     songbookModal.style.display = 'none';
+                    const closeSound = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-select-click-1109.mp3');
+                    closeSound.play();
                 }
             });
         });
@@ -213,14 +268,20 @@ document.addEventListener('DOMContentLoaded', function() {
     function displayLyrics() {
         lyricsDisplay.innerHTML = '';
         
-        lyricsData.forEach(line => {
+        lyricsData.forEach((line, index) => {
             const p = document.createElement('p');
             p.textContent = line.text;
             p.dataset.time = line.time;
+            p.dataset.index = index;
             lyricsDisplay.appendChild(p);
         });
         
         // Center the lyrics container
+        centerLyrics();
+    }
+    
+    // Function to center lyrics
+    function centerLyrics() {
         const containerHeight = lyricsContainer.clientHeight;
         const lyricsHeight = lyricsDisplay.clientHeight;
         lyricsDisplay.style.top = `${(containerHeight - lyricsHeight) / 2}px`;
@@ -229,35 +290,66 @@ document.addEventListener('DOMContentLoaded', function() {
     // Function to sync lyrics with audio
     function syncLyrics() {
         const currentTime = audioPlayer.currentTime;
-        let activeLine = null;
         
-        // Find the current line to highlight
-        for (let i = 0; i < lyricsData.length; i++) {
-            if (lyricsData[i].time <= currentTime) {
-                activeLine = i;
-            } else {
-                break;
-            }
+        // Find the next lyric that hasn't been passed yet
+        while (nextLyricIndex < lyricsData.length && 
+               lyricsData[nextLyricIndex].time <= currentTime) {
+            nextLyricIndex++;
         }
         
-        // Update display
+        // If we found a new active lyric
+        if (nextLyricIndex > 0 && activeLyricIndex !== nextLyricIndex - 1) {
+            activeLyricIndex = nextLyricIndex - 1;
+            updateLyricsDisplay();
+        }
+        
+        // Smooth scrolling for lyrics
+        const activeLine = lyricsDisplay.querySelector(`p[data-index="${activeLyricIndex}"]`);
+        if (activeLine) {
+            const containerHeight = lyricsContainer.clientHeight;
+            const lineTop = activeLine.offsetTop;
+            const lineHeight = activeLine.clientHeight;
+            
+            // Calculate the target scroll position to center the active line
+            const targetScroll = lineTop + lineHeight/2 - containerHeight/2;
+            
+            // Smooth transition to the target position
+            lyricsDisplay.style.transition = 'transform 0.3s ease-out';
+            lyricsDisplay.style.transform = `translateY(${-targetScroll}px)`;
+        }
+    }
+    
+    // Function to update lyrics display with highlighting
+    function updateLyricsDisplay() {
         const lines = lyricsDisplay.querySelectorAll('p');
+        
+        // Remove active class from all lines
+        lines.forEach(line => {
+            line.classList.remove('active', 'passed');
+        });
+        
+        // Add classes based on current state
         lines.forEach((line, index) => {
-            if (index === activeLine) {
+            if (index < activeLyricIndex) {
+                line.classList.add('passed');
+            } else if (index === activeLyricIndex) {
                 line.classList.add('active');
                 
-                // Scroll to center the active line
-                const containerHeight = lyricsContainer.clientHeight;
-                const lineTop = line.offsetTop;
-                const lineHeight = line.clientHeight;
-                lyricsDisplay.style.transform = `translateY(${containerHeight / 2 - lineTop - lineHeight}px)`;
-            } else {
-                line.classList.remove('active');
+                // Split the line into characters for karaoke effect
+                const text = line.textContent;
+                line.innerHTML = '';
+                
+                for (let i = 0; i < text.length; i++) {
+                    const charSpan = document.createElement('span');
+                    charSpan.textContent = text[i];
+                    charSpan.style.animationDelay = `${i * 0.05}s`;
+                    line.appendChild(charSpan);
+                }
             }
         });
     }
     
-    // Add keyboard support
+    // Keyboard support
     document.addEventListener('keydown', function(e) {
         if (e.key >= '0' && e.key <= '9') {
             const button = document.querySelector(`.num-btn[data-number="${e.key}"]`);
