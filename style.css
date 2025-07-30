@@ -1,126 +1,127 @@
 body {
   margin: 0;
-  font-family: 'Arial', sans-serif;
-  background-color: #000;
-  color: #ffa500;
+  font-family: 'Arial Rounded MT Bold', sans-serif;
+  background: #ffefe5;
+  color: #fff;
   overflow: hidden;
 }
 
-.background-video video {
+#bgVideo {
   position: fixed;
   top: 0; left: 0;
   width: 100vw;
   height: 100vh;
   object-fit: cover;
   z-index: -1;
-  filter: blur(4px) brightness(0.4);
+  filter: brightness(0.3);
 }
 
 .karaoke-container {
   padding: 20px;
   text-align: center;
+  max-width: 900px;
+  margin: auto;
+  background: rgba(255, 140, 0, 0.2);
+  border-radius: 15px;
+  box-shadow: 0 0 20px #ffa500;
 }
 
-.title {
+h1 {
   font-size: 2.5em;
-  margin-bottom: 10px;
   color: orange;
   text-shadow: 2px 2px #000;
 }
 
-.code-input input {
-  padding: 10px;
-  font-size: 1em;
-  width: 200px;
-  margin-right: 10px;
-}
-.code-input button {
-  padding: 10px 15px;
-  background: orange;
-  border: none;
-  font-weight: bold;
-  cursor: pointer;
+#screen {
+  background: rgba(0,0,0,0.6);
+  border-radius: 10px;
+  padding: 30px;
+  margin: 20px auto;
+  min-height: 200px;
+  position: relative;
 }
 
-.song-info {
-  margin: 15px;
-  font-size: 1.1em;
+#lyrics {
+  font-size: 2em;
+  line-height: 1.4;
+  color: #ffcc00;
+  white-space: pre-line;
 }
 
 #countdown {
   font-size: 3em;
-  margin: 15px;
-  color: #fff;
-}
-
-.lyrics-screen {
-  height: 300px;
-  overflow-y: auto;
-  background: rgba(0,0,0,0.6);
-  margin: 20px auto;
-  padding: 20px;
-  width: 80%;
-  border: 2px solid orange;
-  border-radius: 10px;
-}
-
-.lyrics-screen ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.lyrics-screen li {
-  font-size: 1.5em;
-  margin: 5px 0;
-  transition: 0.2s;
-}
-
-.lyrics-screen li.active {
-  color: #fff;
-  font-weight: bold;
-  text-shadow: 1px 1px 3px orange;
+  color: red;
+  position: absolute;
+  top: 10px;
+  right: 20px;
 }
 
 .controls {
-  margin: 20px 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 40px;
 }
 
-button {
-  padding: 10px 15px;
-  margin: 0 5px;
-  background-color: orange;
+.code-input input {
+  width: 160px;
+  font-size: 1.4em;
+  padding: 10px;
+  text-align: center;
+  background: #fff;
   color: #000;
-  font-size: 1em;
+  border-radius: 10px;
+  margin-bottom: 10px;
+}
+
+.keypad .row {
+  display: flex;
+  justify-content: center;
+  margin: 5px 0;
+}
+
+.keypad button {
+  width: 60px;
+  height: 60px;
+  font-size: 1.5em;
+  margin: 0 5px;
+  border-radius: 10px;
+  background: orange;
+  color: white;
   border: none;
-  border-radius: 5px;
   cursor: pointer;
+  box-shadow: 0 4px #00000060;
+  transition: 0.2s;
+}
+
+.keypad button:active {
+  transform: scale(0.95);
+}
+
+.volume input {
+  width: 150px;
 }
 
 .songbook {
-  margin-top: 30px;
-  background: rgba(0,0,0,0.5);
+  margin-top: 40px;
+  text-align: left;
+  background: rgba(255, 165, 0, 0.2);
   padding: 15px;
   border-radius: 10px;
-  width: 80%;
-  margin-left: auto;
-  margin-right: auto;
+  color: #fff;
 }
 
 .songbook ul {
-  padding: 0;
   list-style: none;
+  padding: 0;
 }
 
 .songbook li {
   padding: 5px 0;
-  border-bottom: 1px solid #444;
-  font-size: 1em;
 }
 
 #micVisualizer {
   width: 100%;
-  height: 100px;
-  background-color: #111;
+  height: 80px;
   margin-top: 20px;
 }
