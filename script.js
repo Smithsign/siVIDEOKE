@@ -287,67 +287,96 @@ document.addEventListener('DOMContentLoaded', function() {
         lyricsDisplay.style.top = `${(containerHeight - lyricsHeight) / 2}px`;
     }
     
-    // Function to sync lyrics with audio
-    function syncLyrics() {
-        const currentTime = audioPlayer.currentTime;
-        
-        // Find the next lyric that hasn't been passed yet
-        while (nextLyricIndex < lyricsData.length && 
-               lyricsData[nextLyricIndex].time <= currentTime) {
-            nextLyricIndex++;
-        }
-        
-        // If we found a new active lyric
-        if (nextLyricIndex > 0 && activeLyricIndex !== nextLyricIndex - 1) {
-            activeLyricIndex = nextLyricIndex - 1;
-            updateLyricsDisplay();
-        }
-        
-        // Smooth scrolling for lyrics
-        const activeLine = lyricsDisplay.querySelector(`p[data-index="${activeLyricIndex}"]`);
-        if (activeLine) {
-            const containerHeight = lyricsContainer.clientHeight;
-            const lineTop = activeLine.offsetTop;
-            const lineHeight = activeLine.clientHeight;
-            
-            // Calculate the target scroll position to center the active line
-            const targetScroll = lineTop + lineHeight/2 - containerHeight/2;
-            
-            // Smooth transition to the target position
-            lyricsDisplay.style.transition = 'transform 0.3s ease-out';
-            lyricsDisplay.style.transform = `translateY(${-targetScroll}px)`;
+   // Replace the syncLyrics and related functions with these improved versions
+
+// Function to sync lyrics with audio
+function syncLyrics() {
+    const currentTime = audioPlayer.currentTime;
+    
+    // Find the current active lyric
+    let newActiveIndex = -1;
+    for (let i = 0; i < lyricsData.length; i++) {
+        if (lyricsData[i].time <= currentTime) {
+            newActiveIndex = i;
+        } else {
+            break;
         }
     }
-    
-    // Function to update lyrics display with highlighting
-    function updateLyricsDisplay() {
-        const lines = lyricsDisplay.querySelectorAll('p');
+
+    // Only update if the active lyric changed
+    if (newActiveIndex !== activeLyricIndex) {
+        activeLyricIndex = newActiveIndex;
+        updateLyricsDisplay();
         
-        // Remove active class from all lines
-        lines.forEach(line => {
-            line.classList.remove('active', 'passed');
-        });
-        
-        // Add classes based on current state
-        lines.forEach((line, index) => {
-            if (index < activeLyricIndex) {
-                line.classList.add('passed');
-            } else if (index === activeLyricIndex) {
-                line.classList.add('active');
+        // Smooth scroll to the active line
+        if (activeLyricIndex >= 0) {
+            const activeLine = lyricsDisplay.querySelector(`p[data-index="${activeLyricIndex}"]`);
+            if (activeLine) {
+                const containerHeight = lyricsContainer.clientHeight;
+                const lineTop = activeLine.offsetTop;
+                const lineHeight = activeLine.clientHeight;
+                const targetScroll = lineTop + lineHeight/2 - containerHeight/2;
                 
-                // Split the line into characters for karaoke effect
+                lyricsDisplay.style.transition = 'transform 0.5s ease-out';
+                lyricsDisplay.style.transform = `translateY(${-targetScroll}px)`;
+            }
+        }
+    }
+}
+
+// Function to update lyrics display with karaoke highlighting
+function updateLyricsDisplay() {
+    const lines = lyricsDisplay.querySelectorAll('p');
+    const currentTime = audioPlayer.currentTime;
+    
+    lines.forEach((line, index) => {
+        // Clear previous states
+        line.classList.remove('active', 'passed', 'upcoming');
+        line.innerHTML = line.textContent; // Reset any character spans
+        
+        if (index < activeLyricIndex) {
+            line.classList.add('passed');
+        } 
+        else if (index === activeLyricIndex) {
+            line.classList.add('active');
+            
+            // Get the current lyric's timing information
+            const lyricStartTime = lyricsData[index].time;
+            let lyricEndTime = currentTime + 1; // Default end time
+            
+            // If there's a next lyric, use its start time as end time
+            if (index < lyricsData.length - 1) {
+                lyricEndTime = lyricsData[index + 1].time;
+            }
+            
+            // Calculate progress through current lyric (0 to 1)
+            const lyricProgress = (currentTime - lyricStartTime) / (lyricEndTime - lyricStartTime);
+            
+            // Apply karaoke-style character highlighting
+            if (lyricProgress > 0) {
                 const text = line.textContent;
                 line.innerHTML = '';
                 
                 for (let i = 0; i < text.length; i++) {
                     const charSpan = document.createElement('span');
                     charSpan.textContent = text[i];
-                    charSpan.style.animationDelay = `${i * 0.05}s`;
+                    
+                    // Calculate when this character should be highlighted
+                    const charProgress = i / text.length;
+                    
+                    if (charProgress < lyricProgress) {
+                        charSpan.classList.add('sung');
+                    }
+                    
                     line.appendChild(charSpan);
                 }
             }
-        });
-    }
+        }
+        else {
+            line.classList.add('upcoming');
+        }
+    });
+}
     
     // Keyboard support
     document.addEventListener('keydown', function(e) {
