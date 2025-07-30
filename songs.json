@@ -1,7 +1,9 @@
 [
   {
+    "code": "18252",
     "title": "Pour It Up",
     "artist": "Rihanna",
-    "filename": "pouritup"
+    "audio": "pouritup.m4a",
+    "lyrics": "pouritup.lrc"
   }
 ]
