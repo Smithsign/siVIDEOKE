@@ -22,7 +22,7 @@ startButton.addEventListener("click", () => {
 });
 
 // Load LRC file
-fetch("songs/pouritup.lrc")
+fetch("pouritup.lrc")
   .then((response) => response.text())
   .then(parseLRC);
 
