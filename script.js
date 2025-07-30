@@ -4,16 +4,12 @@ const lyricsDisplay = document.getElementById('lyricsDisplay');
 
 const songs = [
   {
-    title: "Perfect (Karaoke)",
-    audio: "songs/perfect.mp3",
-    lyrics: "songs/perfect.lrc"
-  },
-  {
-    title: "Let It Go (Karaoke)",
-    audio: "songs/letitgo.mp3",
-    lyrics: "songs/letitgo.lrc"
+    title: "Pour It Up (Karaoke)",
+    audio: "pouritup.mp3",
+    lyrics: "pouritup.lrc"
   }
 ];
+
 
 let currentLyrics = [];
 
