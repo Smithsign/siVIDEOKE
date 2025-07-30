@@ -3,58 +3,50 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Orange Dynasty Karaoke</title>
+  <title>Orange Dynasty Karaoke 🎤🍊🐉</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+
   <video id="bg-video" autoplay loop muted>
-    <source src="bg.mp4" type="video/mp4" />
+    <source src="bg-video.mp4" type="video/mp4" />
   </video>
 
   <div class="karaoke-container">
     <header>
-      <h1>🍊 Orange Dynasty Karaoke 🐉</h1>
+      <h1>🎤 Orange Dynasty Karaoke 🍊🐉</h1>
     </header>
 
     <div class="screen">
       <div id="countdown"></div>
-      <div id="song-info"></div>
-      <div id="lyrics"></div>
+      <div id="lyrics-display"></div>
     </div>
 
     <div class="controls">
-      <div class="keypad">
-        <input type="text" id="songCode" placeholder="Enter Song Code" maxlength="5" />
-        <div class="buttons">
-          <button onclick="inputCode('1')">1</button>
-          <button onclick="inputCode('2')">2</button>
-          <button onclick="inputCode('3')">3</button>
-          <button onclick="inputCode('4')">4</button>
-          <button onclick="inputCode('5')">5</button>
-          <button onclick="inputCode('6')">6</button>
-          <button onclick="inputCode('7')">7</button>
-          <button onclick="inputCode('8')">8</button>
-          <button onclick="inputCode('9')">9</button>
-          <button onclick="inputCode('0')">0</button>
-          <button onclick="clearCode()">Clear</button>
-          <button onclick="loadSong()">OK</button>
-        </div>
+      <div class="volume">
+        <label>🎛 Volume</label>
+        <input type="range" id="volumeControl" min="0" max="1" step="0.01" value="1" />
       </div>
-      <div class="player-buttons">
-        <button onclick="startKaraoke()">▶️ Play</button>
-        <button onclick="stopKaraoke()">⏹ Stop</button>
-      </div>
-      <div class="volume-control">
-        <label for="volume">🔊 Volume</label>
-        <input type="range" id="volume" min="0" max="1" step="0.01" value="0.8" />
+      <div id="micVisualizer"></div>
+    </div>
+
+    <div class="keypad">
+      <input type="text" id="codeInput" placeholder="Enter song code" readonly />
+      <div class="keys">
+        ${[1,2,3,4,5,6,7,8,9,0].map(n => `<button class="num">${n}</button>`).join("")}
+        <button id="clear">C</button>
+        <button id="play">PLAY</button>
+        <button id="stop">STOP</button>
       </div>
     </div>
 
-    <canvas id="mic-visualizer"></canvas>
-
-    <audio id="karaokeAudio"></audio>
+    <div class="songbook">
+      <h2>📖 SONG BOOK</h2>
+      <ul id="songList"></ul>
+    </div>
   </div>
 
+  <audio id="audio" src=""></audio>
   <script src="script.js"></script>
 </body>
 </html>
