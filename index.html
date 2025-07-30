@@ -1,112 +1,70 @@
-<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Orange Dynasty Videoke</title>
-  <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>siVIDEOKE - Philippine Style Virtual Karaoke</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <video autoplay loop muted id="bg-video">
-    <source src="background.mp4" type="video/mp4" />
-  </video>
-
-  <div id="karaoke-wrapper">
-    <h1>🧡 Orange Dynasty Videoke 🐉</h1>
-
-    <div id="songbook">
-      <input type="text" id="songcode" placeholder="Enter Song Number" readonly />
-      <div id="numpad">
-        <button>1</button><button>2</button><button>3</button>
-        <button>4</button><button>5</button><button>6</button>
-        <button>7</button><button>8</button><button>9</button>
-        <button>0</button><button id="clear">C</button><button id="play">Play</button>
-      </div>
+    <div class="videoke-machine">
+        <div class="header">
+            <h1>siVIDEOKE</h1>
+        </div>
+        
+        <div class="screen-container">
+            <div class="screen" id="display">
+                <div id="song-info"></div>
+                <div id="countdown"></div>
+                <div id="lyrics"></div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <div class="number-pad">
+                <button class="num-btn" data-number="1">1</button>
+                <button class="num-btn" data-number="2">2</button>
+                <button class="num-btn" data-number="3">3</button>
+                <button class="num-btn" data-number="4">4</button>
+                <button class="num-btn" data-number="5">5</button>
+                <button class="num-btn" data-number="6">6</button>
+                <button class="num-btn" data-number="7">7</button>
+                <button class="num-btn" data-number="8">8</button>
+                <button class="num-btn" data-number="9">9</button>
+                <button class="num-btn" data-number="0">0</button>
+            </div>
+            
+            <div class="action-buttons">
+                <button id="play-btn">PLAY</button>
+                <button id="stop-btn">STOP</button>
+                <button id="songbook-btn">SONG BOOK</button>
+            </div>
+            
+            <div class="input-display" id="code-display"></div>
+        </div>
     </div>
-
-    <div id="lyrics"></div>
-
-    <div id="controls">
-      <label>🎛 Volume <input type="range" id="volume" min="0" max="1" step="0.01" /></label>
-      <canvas id="mic-visualizer" width="300" height="100"></canvas>
+    
+    <!-- Song Book Modal -->
+    <div class="modal" id="songbook-modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Song Book</h2>
+            <table id="song-table">
+                <thead>
+                    <tr>
+                        <th>Code</th>
+                        <th>Title</th>
+                        <th>Artist</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
     </div>
-
-    <audio id="karaoke-audio" controls hidden></audio>
-  </div>
-
-  <script>
-    const songs = {
-      '0001': {
-        title: "Pour It Up",
-        audio: "pouritup.mp3",
-        lyrics: [
-          "[Intro] Pour it up, pour it up...",
-          "That's how we ball out...",
-          "[Verse] Strip clubs and dollar bills..."
-        ]
-      }
-    };
-
-    const codeInput = document.getElementById("songcode");
-    const numpad = document.getElementById("numpad");
-    const audio = document.getElementById("karaoke-audio");
-    const lyricsDiv = document.getElementById("lyrics");
-    const volumeSlider = document.getElementById("volume");
-    const micCanvas = document.getElementById("mic-visualizer");
-    const micCtx = micCanvas.getContext("2d");
-
-    let lyricsInterval;
-
-    numpad.addEventListener("click", (e) => {
-      const val = e.target.innerText;
-      if (!isNaN(val)) codeInput.value += val;
-      if (val === "C") codeInput.value = "";
-      if (val === "Play") playKaraoke(codeInput.value);
-    });
-
-    function playKaraoke(code) {
-      if (!songs[code]) {
-        alert("Invalid song code");
-        return;
-      }
-      const song = songs[code];
-      audio.src = song.audio;
-      audio.play();
-
-      lyricsDiv.innerHTML = "";
-      let index = 0;
-      clearInterval(lyricsInterval);
-      lyricsInterval = setInterval(() => {
-        if (index >= song.lyrics.length) return;
-        lyricsDiv.innerHTML = song.lyrics[index];
-        index++;
-      }, 3000);
-    }
-
-    volumeSlider.addEventListener("input", () => {
-      audio.volume = volumeSlider.value;
-    });
-
-    // Mic input visualizer
-    navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
-      const audioCtx = new AudioContext();
-      const source = audioCtx.createMediaStreamSource(stream);
-      const analyser = audioCtx.createAnalyser();
-      source.connect(analyser);
-      const data = new Uint8Array(analyser.frequencyBinCount);
-
-      function draw() {
-        requestAnimationFrame(draw);
-        analyser.getByteFrequencyData(data);
-        micCtx.clearRect(0, 0, micCanvas.width, micCanvas.height);
-        data.slice(0, 50).forEach((v, i) => {
-          micCtx.fillStyle = "orange";
-          micCtx.fillRect(i * 6, micCanvas.height - v / 2, 5, v / 2);
-        });
-      }
-      draw();
-    });
-  </script>
+    
+    <audio id="audio-player"></audio>
+    
+    <script src="songs.json"></script>
+    <script src="script.js"></script>
 </body>
 </html>
