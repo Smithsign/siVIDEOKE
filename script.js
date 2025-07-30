@@ -1,99 +1,104 @@
-const lyrics = [
-  { time: 0, text: "Throw it up, throw it up" },
-  { time: 4, text: "Watch it all fall out" },
-  { time: 8, text: "Pour it up, pour it up" },
-  { time: 12, text: "That's how we ball out" },
-  { time: 16, text: "Strip clubs and dollar bills" },
-  { time: 20, text: "Still got more money" },
-  { time: 24, text: "Patron shots can I get a refill?" },
-  { time: 28, text: "Still got more money" },
-  { time: 32, text: "Strippers going up and down that pole" },
-  { time: 36, text: "And I still got more money" },
-  { time: 40, text: "4 o'clock and we ain't going home" },
-  { time: 44, text: "Still got more money" }
-];
-
+let lyrics = [];
+let currentLine = 0;
+let interval;
+let songCode = "";
 const audio = document.getElementById('audio');
-const lyricsContainer = document.getElementById('lyrics-container');
+const lyricsContainer = document.getElementById('lyrics');
 const progress = document.getElementById('progress');
-const countdownEl = document.getElementById('countdown');
-const songInput = document.getElementById('songCode');
-const songTitle = document.getElementById('song-title');
+const currentTime = document.getElementById('current-time');
+const durationTime = document.getElementById('duration');
 
-document.querySelectorAll('.num').forEach(button => {
-  button.onclick = () => songInput.value += button.textContent;
-});
+function addNumber(num) {
+  songCode += num;
+  document.getElementById('songCodeDisplay').textContent = songCode;
+}
 
-document.getElementById('playBtn').onclick = () => {
-  const code = songInput.value;
-  if (code === '18252') {
-    songTitle.textContent = 'POUR IT UP by Rihanna';
-    startCountdown(() => {
-      playSong();
-    });
+function clearInput() {
+  songCode = "";
+  document.getElementById('songCodeDisplay').textContent = "";
+}
+
+function searchSong() {
+  if (songCode === "18252") {
+    alert("POUR IT UP by Rihanna selected");
+  } else {
+    alert("Song not found");
   }
-};
+}
 
-document.getElementById('stopBtn').onclick = () => {
+function startKaraoke() {
+  if (songCode !== "18252") return alert("Enter valid song code first");
+  lyricsContainer.innerHTML = '';
+  fetch('pour_it_up.lrc')
+    .then(response => response.text())
+    .then(data => {
+      lyrics = parseLRC(data);
+      lyrics.forEach(line => {
+        const p = document.createElement('p');
+        p.textContent = line.text;
+        lyricsContainer.appendChild(p);
+      });
+      setTimeout(() => {
+        audio.play();
+        syncLyrics();
+      }, 3000); // 3s countdown
+    });
+}
+
+function stopKaraoke() {
   audio.pause();
   audio.currentTime = 0;
-  clearLyrics();
-  songTitle.textContent = 'Waiting for song...';
-};
-
-function startCountdown(callback) {
-  let count = 3;
-  countdownEl.style.display = 'block';
-  countdownEl.textContent = count;
-  const interval = setInterval(() => {
-    count--;
-    countdownEl.textContent = count;
-    if (count <= 0) {
-      clearInterval(interval);
-      countdownEl.style.display = 'none';
-      callback();
-    }
-  }, 1000);
-}
-
-function playSong() {
-  audio.play();
-  renderLyrics();
-  const interval = setInterval(() => {
-    updateLyrics(audio.currentTime);
-    updateProgress();
-    if (audio.ended) clearInterval(interval);
-  }, 300);
-}
-
-function renderLyrics() {
+  clearInterval(interval);
   lyricsContainer.innerHTML = '';
-  lyrics.forEach((line, i) => {
-    const div = document.createElement('div');
-    div.className = 'line';
-    div.id = 'line-' + i;
-    div.textContent = line.text;
-    lyricsContainer.appendChild(div);
-  });
+  songCode = "";
+  document.getElementById('songCodeDisplay').textContent = "";
 }
 
-function updateLyrics(currentTime) {
-  lyrics.forEach((line, i) => {
-    const lineEl = document.getElementById('line-' + i);
-    if (currentTime >= line.time && (!lyrics[i + 1] || currentTime < lyrics[i + 1].time)) {
-      document.querySelectorAll('.line').forEach(el => el.classList.remove('active'));
-      lineEl.classList.add('active');
-      lyricsContainer.scrollTop = lineEl.offsetTop - lyricsContainer.offsetTop - 100;
+function parseLRC(lrcText) {
+  const lines = lrcText.split('\n');
+  const result = [];
+
+  for (const line of lines) {
+    const match = line.match(/\[(\d{2}):(\d{2}\.\d{2})\](.*)/);
+    if (match) {
+      const min = parseInt(match[1]);
+      const sec = parseFloat(match[2]);
+      const time = min * 60 + sec;
+      result.push({ time, text: match[3] });
     }
-  });
+  }
+  return result;
+}
+
+function syncLyrics() {
+  interval = setInterval(() => {
+    const time = audio.currentTime;
+    for (let i = 0; i < lyrics.length; i++) {
+      if (time >= lyrics[i].time && (!lyrics[i + 1] || time < lyrics[i + 1].time)) {
+        if (currentLine !== i) {
+          const lines = lyricsContainer.querySelectorAll('p');
+          lines.forEach(p => p.classList.remove('active'));
+          lines[i].classList.add('active');
+          currentLine = i;
+        }
+      }
+    }
+
+    updateProgress();
+  }, 100);
 }
 
 function updateProgress() {
-  const percent = (audio.currentTime / audio.duration) * 100;
-  progress.style.width = percent + '%';
+  if (!isNaN(audio.duration)) {
+    const percent = (audio.currentTime / audio.duration) * 100;
+    progress.style.width = percent + "%";
+    currentTime.textContent = formatTime(audio.currentTime);
+    durationTime.textContent = formatTime(audio.duration);
+  }
 }
 
-function clearLyrics() {
-  lyricsContainer.innerHTML = '';
-  progress.style.width = '0%';
+function formatTime(sec) {
+  const m = Math.floor(sec / 60);
+  const s = Math.floor(sec % 60).toString().padStart(2, '0');
+  return `${m}:${s}`;
 }
